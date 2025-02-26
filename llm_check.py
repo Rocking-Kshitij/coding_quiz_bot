@@ -1,5 +1,4 @@
 import streamlit as st
-import sqlite3
 import json
 from lmstudio_llama import CustomLLamaLLM
 from langchain_core.prompts import PromptTemplate

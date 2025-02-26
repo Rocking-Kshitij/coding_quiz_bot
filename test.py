@@ -1,8 +1,8 @@
-def get_even_numbers(lst):
-    even = []
-    for item in lst :
-        if item%2 ==0:
-            even.append(item)
-    return sum(even)
+from lmstudio_llama import CustomEmbedding
 
-print(get_even_numbers([1,2,3,4]))
+embeddings = CustomEmbedding("text-embedding-nomic-embed-text-v1.5@q8_0")
+
+# print(embeddings.embed_documents(["hello", "bye"]))
+print(len(embeddings.embed_query("hiee")))
+
+# embedding vector length = 768
