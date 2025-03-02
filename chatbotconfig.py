@@ -9,8 +9,9 @@ import numpy as np
 qwen2_5 = "qwen2.5-coder-7b-instruct"
 llm = CustomLLamaLLM(llama_model=qwen2_5)
 embeddings = CustomEmbedding("text-embedding-nomic-embed-text-v1.5@q8_0")
-db_name = "coding_practice.db"
 
+
+csv_folder = "csv_files"
 
 
 # Configure logging to write logs to a file
