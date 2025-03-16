@@ -1,102 +1,225 @@
-
 import numpy as np
-from chatbotconfig import llm, log_conversation, db_name
-import sqlite3
+from chatbotconfig import llm, get_connection, embeddings, csv_folder, log_conversation
+import sqlite3, json
+from prompts import question_chain, answer_chain, feedback_chain, rating_chain
+import pandas as pd
+from datetime import datetime
 
 
+conn = get_connection()
 
+# getting json
+def get_dict_result(input):
+    result = input[input.find("{"):input.find("}")+1]
+    return json.loads(result)
 
-# Database setup
-def init_db():
-    conn = sqlite3.connect(db_name)
-    c = conn.cursor()
-    c.execute('''CREATE TABLE IF NOT EXISTS practice (
-                    id INTEGER PRIMARY KEY,
-                    question TEXT,
-                    user_answer TEXT,
-                    feedback TEXT,
-                    difficulty TEXT,
-                    skill_name TEXT,
-                    subtopic TEXT,
-                    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-                )''')
+# Database setup  #now
+def setup_database(conn):  # now
+    cursor = conn.cursor()
+    # Enable pgvector extension
+    cursor.execute("CREATE EXTENSION IF NOT EXISTS vector;")
+    
+    # Create Skills table
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS Skills (
+            skillid SERIAL PRIMARY KEY,
+            subject TEXT NOT NULL,
+            topic TEXT NOT NULL,
+            subtopic TEXT,
+            content TEXT,
+            importance INTEGER CHECK (importance BETWEEN 0 AND 10),
+            performance INTEGER CHECK (performance BETWEEN 0 AND 10) DEFAULT 0,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            vector_tags vector(768),
+            UNIQUE (subject, topic, subtopic)
+        );
+        """
+    )
+    
+    # Create QuestionBank table
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS QuestionBank (
+            question_id SERIAL PRIMARY KEY,
+            question TEXT NOT NULL,
+            user_answer TEXT,
+            feedback TEXT,
+            rating INTEGER CHECK (rating BETWEEN 0 AND 10),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            vector_data vector(768)
+        );
+        """
+    )
+    
     conn.commit()
+    cursor.close()
+    print("Database setup complete.")
+
+def update_skills_from_csv(conn, embeddings, csv_folder):
+    cursor = conn.cursor()
+    
+    for file in os.listdir(csv_folder):
+        if file.endswith(".csv"):
+            file_path = os.path.join(csv_folder, file)
+            print(file_path, flush=True)
+            df = pd.read_csv(file_path)
+            
+            for _, row in df.iterrows():
+                text_data = f"{row['subject']} {row['topic']} {row.get('subtopic', '')} {row.get('content', '')}"
+                vector_embedding = embeddings.embed_query(text_data)
+                
+                cursor.execute(
+                    """
+                    INSERT INTO Skills (subject, topic, subtopic, content, importance, performance, vector_tags)
+                    VALUES (%s, %s, %s, %s, %s, 0, %s)
+                    ON CONFLICT (subject, topic, subtopic) DO UPDATE 
+                    SET content = EXCLUDED.content,
+                        importance = EXCLUDED.importance,
+                        updated_at = CURRENT_TIMESTAMP,
+                        vector_tags = EXCLUDED.vector_tags;
+                    """,
+                    (row['subject'], row['topic'], row.get('subtopic', None), row.get('content', None), row['importance'], vector_embedding)
+                )
+    
+    conn.commit()
+    cursor.close()
     conn.close()
+    print("Skills table updated from CSV files.")
 
 
-# Function to analyze past performance and determine the next question
-def determine_next_question(skill_name):
-    conn = sqlite3.connect(db_name)
-    c = conn.cursor()
-    c.execute("""
-        SELECT subtopic, difficulty, 
-               CASE 
-                   WHEN feedback LIKE '%incorrect%' THEN 1 
-                   ELSE 0 
-               END as error_flag,
-               timestamp
-        FROM practice 
-        WHERE skill_name = ? 
-        ORDER BY timestamp DESC
-        LIMIT 10
-    """, (skill_name,))
+def get_next_skill(conn, subject):  # returns subject, topic
+    """
+    Determines the next skill ID to ask a question from based on importance, performance, and recency.
+    """
+
+    cursor = conn.cursor()
     
-    data = c.fetchall()
-    conn.close()
+    # Get current timestamp
+    now = datetime.utcnow()
     
-    if not data:
-        return "General", "Beginner"
-    
-    subtopic_performance = {}
-    difficulty_levels = ["Beginner", "Easy Intermediate", "Hard Intermediate", "Advanced"]
-    
-    for subtopic, difficulty, error, timestamp in data:
-        if subtopic not in subtopic_performance:
-            subtopic_performance[subtopic] = []
-        subtopic_performance[subtopic].append(error)
-    
-    weakest_subtopic = max(subtopic_performance, key=lambda sub: np.mean(subtopic_performance[sub]))
-    avg_error_rate = np.mean(subtopic_performance[weakest_subtopic])
-    
-    if avg_error_rate > 0.6:
-        next_difficulty = "Beginner"
-    elif avg_error_rate > 0.4:
-        next_difficulty = "Easy Intermediate"
-    elif avg_error_rate > 0.2:
-        next_difficulty = "Hard Intermediate"
+    if subject == "Any":
+        cursor.execute(
+            """
+            SELECT skillid, importance, performance, updated_at
+            FROM Skills
+            WHERE importance > 0
+            """
+        )
     else:
-        next_difficulty = "Advanced"
+        cursor.execute(
+            """
+            SELECT skillid, importance, performance, updated_at
+            FROM Skills
+            WHERE importance > 0 and subject = %s
+            """,
+            (subject,)
+        )
+
+    skills = cursor.fetchall()
+    if not skills:
+        print("No skills found.")
+        return None
+
     
-    return weakest_subtopic, next_difficulty
+    best_skill = None
+    best_score = float('-inf')
+
+        # Weight factors
+    w1, w2, w3 = 1.5, 1, 0.01
+    
+    for skillid, importance, performance, updated_at in skills:
+        time_decay = (now - updated_at).days if updated_at else 100  # Older updates are prioritized
+        score = (importance * w1) - (performance * w2) + (time_decay * w3)
+        
+        if score > best_score:
+            best_score = score
+            best_skill = skillid
+    
+        # Fetch skill details
+    cursor.execute("SELECT subject, topic, subtopic FROM Skills WHERE skillid = %s", (best_skill,))
+    skill = cursor.fetchone()
+    if not skill:
+        print("Skill ID not found in database.")
+        return
+    subject, topic, subtopic = skill
+    cursor.close()
+    return subject, topic, subtopic, best_skill
 
 # Function to get question from LLM based on past performance
-def get_question(skill_name):
-    subtopic, difficulty = determine_next_question(skill_name)
-    idea_prompt = f"Generate a {difficulty} level coding question in {subtopic} for {skill_name}."
-    response = llm.invoke(idea_prompt)
-    log_conversation(idea_prompt, response)
-    return response, subtopic, difficulty
+def get_question(conn, subject):  # work to get coding language too
+    subject, topic, subtopic, best_skill = get_next_skill(conn, subject)
+    question = question_chain.invoke({"subject": subject, "topic":topic, "subtopic":subtopic})
+    # log_conversation(idea_prompt, response)
+    return question, best_skill, subject, topic, subtopic
 
 
 # Function to get correct answer from LLM
 def get_correct_answer(question):
-    answer_prompt = f"Provide the correct answer for the following question:\n\n{question}\n\nAnswer:"
-    response = llm.invoke(answer_prompt)
-    log_conversation(answer_prompt, response)
+    response = answer_chain.invoke({"question": question})
+    # log_conversation(answer_prompt, response)
     return response
 
 # Function to evaluate the answer
-def get_feedback(question, user_answer):
-    feedback_prompt = f"Evaluate the following answer for the given question. Provide detailed feedback including correctness, improvements, and best practices.\n\nQuestion: {question}\nAnswer: {user_answer}\n\nFeedback:"
-    response = llm.invoke(feedback_prompt)
-    log_conversation(feedback_prompt, response)
-    return response
+def get_feedback(question, user_answer): # can return rating too later
+    feedback = feedback_chain.invoke({"question": question, "user_answer": user_answer})
+    rating = rating_chain.invoke({"question": question, "user_answer": user_answer, "feedback": feedback})
+    rating_json = get_dict_result(rating)
+    # feedback, rating
+    # log_conversation(feedback_prompt, response)
+    return feedback, int(rating_json["rating_score"])
 
 # Function to store result in the database
-def store_result(question, user_answer, feedback, difficulty, skill_name, subtopic):
-    conn = sqlite3.connect(db_name)
-    c = conn.cursor()
-    c.execute("INSERT INTO practice (question, user_answer, feedback, difficulty, skill_name, subtopic) VALUES (?, ?, ?, ?, ?, ?)",
-              (question, user_answer, feedback, difficulty, skill_name, subtopic))
+def store_result(conn, question, user_answer, feedback, rating, skill_id):
+        # Store the question, answer, and feedback in the database
+    vector_data = embeddings.embed_documents([question + feedback])[0]
+    cursor = conn.cursor()
+    ## Inserting in questionbank
+    cursor.execute(
+        """
+        INSERT INTO QuestionBank (question, user_answer, feedback, rating, vector_data)
+        VALUES (%s, %s, %s, %s, %s)
+        """,
+        (question, user_answer, feedback, rating, vector_data)
+    )
+    # Update performance in the Skills table using weighted average
+    cursor.execute("SELECT performance FROM Skills WHERE skillid = %s", (skill_id,))
+    current_performance = cursor.fetchone()[0]
+    #70% weight is given to the current performance in the skills table. 30% weight is assigned to the new rating received from the LLM.
+    new_performance = round((current_performance * 0.7) + (rating * 0.3), 2)
+    cursor.execute(
+        """
+        UPDATE Skills
+        SET performance = %s, updated_at = CURRENT_TIMESTAMP
+        WHERE skillid = %s
+        """,
+        (new_performance, skill_id)
+    )
+    # Update performance for other similar skills using vector similarity
+    cursor.execute(
+        """
+        SELECT skillid, performance, vector_tags <=> %s::vector AS similarity
+        FROM Skills
+        WHERE skillid != %s
+        ORDER BY similarity ASC
+        LIMIT 5  -- Consider top 5 most similar topics
+        """,
+        (vector_data, skill_id)
+    )
+
+    similar_skills = cursor.fetchall()
+    
+    for similar_skill_id, similar_performance, similarity in similar_skills:
+        similarity_weight = max(0, 1 - similarity)  # Convert distance to similarity score
+        updated_performance = round((similar_performance * (1 - similarity_weight)) + (rating * similarity_weight), 2)
+        cursor.execute(
+            """
+            UPDATE Skills
+            SET performance = %s, updated_at = CURRENT_TIMESTAMP
+            WHERE skillid = %s
+            """,
+            (updated_performance, similar_skill_id)
+        )
+    
     conn.commit()
-    conn.close()
+    cursor.close()

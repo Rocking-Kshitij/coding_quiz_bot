@@ -25,7 +25,10 @@ class CustomLLamaLLM(LLM):
             messages = history,
             temperature=0.7,
         ).choices[0].message.content
-        return output
+        if kwargs.get('prompt_show') == True:
+            return output, prompt
+        else:
+            return output
 
     @property
     def _identifying_params(self) -> Dict[str, Any]:

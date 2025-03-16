@@ -13,6 +13,17 @@ embeddings = CustomEmbedding("text-embedding-nomic-embed-text-v1.5@q8_0")
 
 csv_folder = "csv_files"
 
+def get_connection(): 
+    # Database connection
+    conn = psycopg2.connect(
+        dbname="ai_test_db",
+        user="data_pgvector_user",
+        password="data_pgvector_password",
+        host="localhost",
+        port="5435"
+    )
+    return conn
+
 
 # Configure logging to write logs to a file
 logging.basicConfig(

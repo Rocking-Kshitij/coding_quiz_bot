@@ -191,7 +191,6 @@ def ask_question_and_update_performance(conn, skill_id, llm):
     
     conn.commit()
     cursor.close()
-    conn.close()
     print("Performance updated successfully.")
 
 last_question_vector = embeddings.embed_query("What is Python")
