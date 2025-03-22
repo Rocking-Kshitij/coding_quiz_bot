@@ -1,9 +1,10 @@
 import streamlit as st
-import json
+import json, atexit
 from langchain_core.prompts import PromptTemplate
 import streamlit.components.v1 as components
 from streamlit_ace import st_ace
-from chat_bot_backend import get_question, store_result, get_correct_answer,get_feedback, conn, setup_database
+from chat_bot_backend import get_question, store_result, get_correct_answer,get_feedback, setup_database
+from chatbotconfig import get_connection
 
 language_list = ["Python", "Bash", "FastAPI", "Streamlit", "Django"]
 # Function to map skill name to programming language
@@ -11,29 +12,34 @@ def get_language_from_skill():
     # Subject : language
     return {
         "Python": "python",
-        "Bash": "bash",
+        "Bash": "sh",
         "FastAPI": "python",
-        "Streamlit": "python",
-        "Django": "python",
+        # "Streamlit": "python",
+        # "Django": "django",
         "SQL": "sql",
-        "PyTorch": "python",
-        "Kafka (Python)": "python",
-        "MongoDB": "sql",
-        "Docker": "bash",
+        # "PyTorch": "python",
+        # "Kafka (Python)": "python",
+        # "MongoDB": "sql",
+        "Docker": "dockerfile",
         "Kubernetes": "yaml",
-        "Terraform": "plain_text",
-        "Ansible": "yaml",
-        "GitHub Actions": "yaml",
-        "Apache Airflow (Python)": "python",
-        "Git": "bash",
+        "Terraform": "terraform",
+        # "Ansible": "yaml",
+        # "GitHub Actions": "yaml",
+        # "Apache Airflow (Python)": "python",
+        # "Git": "sh",
         "Pyspark": "python"
     }
 
 # Initialize session state
-for key in ['question', 'skill_id', 'skill_name', 'feedback', 'subtopic', 'topic', 'lock_button', "code", 'subject', 'language', 'score']:
+for key in ['question', 'skill_id', 'skill_name', 'feedback', 'subtopic', 'topic', 'unlock_button', "code", 'subject', 'language', 'score', 'conn', "question_level"]:
     if key not in st.session_state:
-        st.session_state[key] = ""
-# st.session_state['lock_button'] = False
+        if key == 'conn':
+            st.session_state[key] = get_connection()
+        elif key == 'unlock_button':
+            st.session_state[key] = True
+        else:
+            st.session_state[key] = ""
+
 st.session_state['subject'] = ""
 st.session_state['language'] = ""
 
@@ -54,28 +60,32 @@ with left:
     st.session_state['language'] = get_language_from_skill().get(st.session_state['subject'])
     with col1:
         if st.button("Get a Question"):
-            question, skill_id, subject, topic, subtopic = get_question(conn,st.session_state['subject'])
-            language = get_language_from_skill().get(subject)
-            st.session_state.update({'question': question, 'subtopic': subtopic, 'feedback': "", 'lock_button':True, 'skill_id':skill_id, 'subject':subject, 'language':language, 'topic': topic})
-            st.rerun()
+            with st.spinner("Fetching the question"):
+                question, skill_id, subject, topic, subtopic, level = get_question(st.session_state['conn'],st.session_state['subject'])
+                language = get_language_from_skill().get(subject)
+                st.session_state.update({'question': question, 'subtopic': subtopic, 'feedback': "", 'unlock_button':True, 'skill_id':skill_id, 'subject':subject, 'language':language, 'topic': topic, "question_level": level})
+                st.rerun()
     with col2:
-        if st.button("Unable to Solve") and st.session_state['lock_button']:
-            st.session_state['lock_button'] = False
-            correct_answer = get_correct_answer(st.session_state['question'])
-            st.session_state['feedback'] = f"\n\n{correct_answer}"
-            st.session_state['score'] = 0
-            store_result(conn, st.session_state['question'], "Unable to Solve", correct_answer, st.session_state['score'], st.session_state['skill_id'])
-            st.rerun()
+        if st.button("Unable to Solve") and st.session_state['unlock_button']:
+            with st.spinner("Fetching the feedback"):
+                correct_answer = get_correct_answer(st.session_state['question'])
+                # st.session_state['feedback'] = f"\n\n{correct_answer}"
+                # st.session_state['score'] = 0
+                st.session_state.update({'feedback': f"\n\n{correct_answer}", 'score':0,'unlock_button':False})
+                store_result(st.session_state['conn'], st.session_state['question'], "Unable to Solve", correct_answer, st.session_state['score'], st.session_state['skill_id'])
+                st.rerun()
     with col3:
-        if st.button("Submit Answer")  and st.session_state['lock_button'] and len(st.session_state['code'])!=0:
-            st.session_state['lock_button'] = False
-            feedback, score = get_feedback(st.session_state['question'], st.session_state['code'])
-            st.session_state['feedback'] = f"\n\n{feedback}"
-            st.session_state['score'] = score
-            store_result(conn, st.session_state['question'], st.session_state['code'], feedback, score, st.session_state['skill_id'])
-            st.rerun()
+        if st.button("Submit Answer") and st.session_state['unlock_button'] and len(st.session_state['code'])!=0:
+            with st.spinner("Fetching the feedback"):
+                feedback, score = get_feedback(st.session_state['question'], st.session_state['code'])
+                # st.session_state['feedback'] = f"\n\n{feedback}"
+                # st.session_state['score'] = score
+                store_result(st.session_state['conn'], st.session_state['question'], st.session_state['code'], feedback, score, st.session_state['skill_id'])
+                st.session_state.update({'feedback': f"\n\n{feedback}", 'score':score,'unlock_button':False})
+                st.rerun()
 
     # st.subheader("Question")
+    st.write(f"Level: {st.session_state['question_level']}")
     st.write(f"{st.session_state['question']}")
 
 with right:
@@ -94,11 +104,13 @@ with right:
 
 # Full-width Feedback Section
 st.markdown("---")
-if st.session_state['lock_button'] == False:
+if st.session_state['feedback'] !="":
     st.subheader("Feedback")
     st.write(f"Current score is: {st.session_state['score']}")
     st.write(f"{st.session_state['feedback']}")
     st.session_state['score'] = ""
 
-
-# setup_database(conn)
+# st.session_state['conn'].close()
+# # setup_database(conn)
+# if "conn" in st.session_state:
+#     atexit.register(st.session_state['conn'].close())

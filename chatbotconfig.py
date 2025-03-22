@@ -1,7 +1,7 @@
 from lmstudio_llama import CustomLLamaLLM, CustomEmbedding
 import logging
 from datetime import datetime
-import psycopg2
+import psycopg2, os
 import numpy as np
 
 

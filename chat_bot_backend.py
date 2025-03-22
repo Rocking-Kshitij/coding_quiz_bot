@@ -1,16 +1,27 @@
 import numpy as np
 from chatbotconfig import llm, get_connection, embeddings, csv_folder, log_conversation
-import sqlite3, json
-from prompts import question_chain, answer_chain, feedback_chain, rating_chain
+import sqlite3, json, random
+from prompts import beginner_question_chain,easy_question_chain,medium_question_chain,hard_question_chain,answer_chain, feedback_chain, rating_chain
 import pandas as pd
 from datetime import datetime
 
-
-conn = get_connection()
+# def remove_extra(str):
+#     return str.replace("\"", '\\"')
+# conn = get_connection()
+def get_hardness(score):
+    score = int(score)
+    if score <25:
+        return "Beginner level"
+    elif score <50:
+        return "Easy level"
+    elif score <75:
+        return "Medium level"
+    else:
+        return "Hard Level"
 
 # getting json
 def get_dict_result(input):
-    result = input[input.find("{"):input.find("}")+1]
+    result = input[input.find("{"):len(input)-input[::-1].find("}")]
     return json.loads(result)
 
 # Database setup  #now
@@ -120,13 +131,14 @@ def get_next_skill(conn, subject):  # returns subject, topic
     if not skills:
         print("No skills found.")
         return None
-
+    else:
+        random.shuffle(skills)
     
     best_skill = None
     best_score = float('-inf')
 
         # Weight factors
-    w1, w2, w3 = 1.5, 1, 0.01
+    w1, w2, w3 = 1.5, 0.1, 0.01
     
     for skillid, importance, performance, updated_at in skills:
         time_decay = (now - updated_at).days if updated_at else 100  # Older updates are prioritized
@@ -137,21 +149,34 @@ def get_next_skill(conn, subject):  # returns subject, topic
             best_skill = skillid
     
         # Fetch skill details
-    cursor.execute("SELECT subject, topic, subtopic FROM Skills WHERE skillid = %s", (best_skill,))
+    cursor.execute("SELECT subject, topic, subtopic, performance FROM Skills WHERE skillid = %s", (best_skill,))
     skill = cursor.fetchone()
     if not skill:
         print("Skill ID not found in database.")
         return
-    subject, topic, subtopic = skill
+    subject, topic, subtopic, performance = skill
     cursor.close()
-    return subject, topic, subtopic, best_skill
+    return subject, topic, subtopic, best_skill, performance
 
 # Function to get question from LLM based on past performance
 def get_question(conn, subject):  # work to get coding language too
-    subject, topic, subtopic, best_skill = get_next_skill(conn, subject)
-    question = question_chain.invoke({"subject": subject, "topic":topic, "subtopic":subtopic})
+    subject, topic, subtopic, best_skill, performance = get_next_skill(conn, subject)
+    score = int(performance)
+    if score <25:
+        level = "Beginner level"
+        question = beginner_question_chain.invoke({"subject": subject, "topic":topic, "subtopic":subtopic, "level": level})
+    elif score <50:
+        level = "Easy level"
+        question = easy_question_chain.invoke({"subject": subject, "topic":topic, "subtopic":subtopic, "level": level})
+    elif score <75:
+        level = "Medium level"
+        question = medium_question_chain.invoke({"subject": subject, "topic":topic, "subtopic":subtopic, "level": level})
+    else:
+        level = "Hard level"
+        question = hard_question_chain.invoke({"subject": subject, "topic":topic, "subtopic":subtopic, "level": level})
+    # question = question_chain.invoke({"subject": subject, "topic":topic, "subtopic":subtopic, "level": get_hardness(performance)})
     # log_conversation(idea_prompt, response)
-    return question, best_skill, subject, topic, subtopic
+    return question, best_skill, subject, topic, subtopic, level
 
 
 # Function to get correct answer from LLM
@@ -161,9 +186,12 @@ def get_correct_answer(question):
     return response
 
 # Function to evaluate the answer
-def get_feedback(question, user_answer): # can return rating too later
+def get_feedback(question, user_answer):
     feedback = feedback_chain.invoke({"question": question, "user_answer": user_answer})
-    rating = rating_chain.invoke({"question": question, "user_answer": user_answer, "feedback": feedback})
+    try:
+        rating = rating_chain.invoke({"question": question, "user_answer": user_answer, "feedback": feedback})
+    except:
+        rating = rating_chain.invoke({"question": question, "user_answer": user_answer, "feedback": feedback})
     rating_json = get_dict_result(rating)
     # feedback, rating
     # log_conversation(feedback_prompt, response)
@@ -171,6 +199,9 @@ def get_feedback(question, user_answer): # can return rating too later
 
 # Function to store result in the database
 def store_result(conn, question, user_answer, feedback, rating, skill_id):
+    # question = question.replace("\"", '\\"')
+    # user_answer = user_answer.replace("\"", '\\"')
+    # feedback = feedback.replace("\"", '\\"')
         # Store the question, answer, and feedback in the database
     vector_data = embeddings.embed_documents([question + feedback])[0]
     cursor = conn.cursor()
@@ -186,7 +217,7 @@ def store_result(conn, question, user_answer, feedback, rating, skill_id):
     cursor.execute("SELECT performance FROM Skills WHERE skillid = %s", (skill_id,))
     current_performance = cursor.fetchone()[0]
     #70% weight is given to the current performance in the skills table. 30% weight is assigned to the new rating received from the LLM.
-    new_performance = round((current_performance * 0.7) + (rating * 0.3), 2)
+    new_performance = round((current_performance * 0.9) + (rating * 0.1), 2)
     cursor.execute(
         """
         UPDATE Skills

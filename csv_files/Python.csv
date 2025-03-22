@@ -1,0 +1,42 @@
+subject,topic,subtopic,content,importance
+Python,Python Basics,"Syntax, Variables & Input/Output",,10
+Python,Python Basics,Data Types & Type Conversion,,10
+Python,Python Basics,"Operators (Arithmetic, Logical, Bitwise)",,9
+Python,Python Basics,Mutable vs Immutable Types,,9
+Python,Control Flow & Iteration,"Conditional Statements (if-else, match-case)",,10
+Python,Control Flow & Iteration,"Loops (for, while, break, continue)",,10
+Python,Control Flow & Iteration,Nested Loops & Loop Optimization,,9
+Python,Functions & Scope,Function Definition & Invocation,,10
+Python,Functions & Scope,"Function Arguments (*args, **kwargs, defaults)",,10
+Python,Functions & Scope,Lambda Functions,,9
+Python,Functions & Scope,Recursion & Tail Recursion,,10
+Python,Functions & Scope,"Scope (Local, Global, Nonlocal)",,9
+Python,Iterators & Generators,Custom Iterators,,10
+Python,Iterators & Generators,Generators & Yield Statement,,10
+Python,Data Structures & Collections,Lists & List Comprehension,,10
+Python,Data Structures & Collections,Tuples & Tuple Operations,,9
+Python,Data Structures & Collections,Sets & Set Operations,,9
+Python,Data Structures & Collections,Dictionaries & Dictionary Comprehension,,10
+Python,Data Structures & Collections,"Stacks, Queues & Deques (collections)",,9
+Python,Data Structures & Collections,Priority Queues (heapq module),,9
+Python,String Handling,String Operations & Methods,,10
+Python,String Handling,"String Formatting (f-strings, format())",,10
+Python,String Handling,Regular Expressions (re Module),,9
+Python,Object-Oriented Programming (OOP),Classes & Objects,,10
+Python,Object-Oriented Programming (OOP),Constructors & Destructors,,10
+Python,Object-Oriented Programming (OOP),"Inheritance (Single, Multiple, Multilevel)",,10
+Python,Object-Oriented Programming (OOP),Polymorphism & Method Overriding,,9
+Python,Object-Oriented Programming (OOP),Magic Methods & Operator Overloading,,9
+Python,Exception Handling,Try-Except Blocks & Error Handling,,10
+Python,Exception Handling,Handling Multiple Exceptions,,9
+Python,Exception Handling,Raising & Custom Exceptions,,9
+Python,File Handling,"Reading & Writing Files (txt, csv, json)",,10
+Python,Algorithms & Problem Solving,"Sorting Algorithms (Bubble, Quick, Merge)",,10
+Python,Algorithms & Problem Solving,"Searching Algorithms (Binary, Linear)",,9
+Python,Algorithms & Problem Solving,Two Pointers & Sliding Window Techniques,,9
+Python,Algorithms & Problem Solving,Hashing & Hash Tables,,9
+Python,Algorithms & Problem Solving,Recursion & Backtracking Problems,,10
+Python,Algorithms & Problem Solving,"Dynamic Programming (Memoization, Tabulation)",,10
+Python,Algorithms & Problem Solving,"Graph Algorithms (BFS, DFS, Dijkstra)",,10
+Python,Algorithms & Problem Solving,Tree Traversals & Binary Trees,,10
+Python,Algorithms & Problem Solving,"Linked Lists (Singly, Doubly, Circular)",,9
