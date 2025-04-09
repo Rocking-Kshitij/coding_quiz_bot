@@ -11,6 +11,7 @@ language_list = ["Python", "Bash", "FastAPI", "Streamlit", "Django"]
 def get_language_from_skill():
     # Subject : language
     return {
+        "Any": "plain_text",
         "Python": "python",
         "Bash": "sh",
         "FastAPI": "python",
@@ -31,17 +32,22 @@ def get_language_from_skill():
     }
 
 # Initialize session state
-for key in ['question', 'skill_id', 'skill_name', 'feedback', 'subtopic', 'topic', 'unlock_button', "code", 'subject', 'language', 'score', 'conn', "question_level"]:
+for key in ['question', 'skill_id', 'skill_name', 'feedback', 'subtopic', 'topic', 'unlock_button', "code", 'subject', 'language', 'score', 'conn', "question_level", "select_box"]:
     if key not in st.session_state:
         if key == 'conn':
             st.session_state[key] = get_connection()
         elif key == 'unlock_button':
+            st.session_state[key] = False
+        elif key == 'select_box':
             st.session_state[key] = True
+        elif key == 'subject':
+            st.session_state[key] = "Any"
+            st.session_state['language'] = get_language_from_skill().get(st.session_state['subject'])
         else:
             st.session_state[key] = ""
 
-st.session_state['subject'] = ""
-st.session_state['language'] = ""
+# st.session_state['subject'] = ""
+# st.session_state['language'] = ""
 
 # Streamlit UI
 st.set_page_config(layout="wide")
@@ -56,14 +62,27 @@ with left:
     col1, col2, col3 = st.columns([1, 1, 1])
     
     # st.session_state['subject']  = st.selectbox(f"Current language is {st.session_state['language']}",["Any"]+list(get_language_from_skill().keys()))
-    st.session_state['subject']  = st.selectbox(f"Current Subject here",["Any"]+list(get_language_from_skill().keys()))
-    st.session_state['language'] = get_language_from_skill().get(st.session_state['subject'])
+    n_list = list(get_language_from_skill().keys())
+    # st.session_state['unlock_button'] and 
+    # if (not st.session_state['select_box']):
+    #     st.session_state['select_box'] = True
+    #     index = n_list.index(st.session_state['subject'])
+    #     st.session_state['subject'] = st.selectbox(f"Current Subject here",n_list, index=index)
+    #     st.rerun()
+    if (st.session_state['select_box']):
+        st.session_state['subject'] = st.selectbox(f"Current Subject here",n_list)
+        st.session_state['language'] = get_language_from_skill().get(st.session_state['subject'])
+    else:
+        index = n_list.index(st.session_state['subject'])
+        st.session_state['subject'] = st.selectbox(f"Current Subject here",n_list, index=index)
+        st.session_state['language'] = get_language_from_skill().get(st.session_state['subject'])
+        
     with col1:
         if st.button("Get a Question"):
             with st.spinner("Fetching the question"):
                 question, skill_id, subject, topic, subtopic, level = get_question(st.session_state['conn'],st.session_state['subject'])
                 language = get_language_from_skill().get(subject)
-                st.session_state.update({'question': question, 'subtopic': subtopic, 'feedback': "", 'unlock_button':True, 'skill_id':skill_id, 'subject':subject, 'language':language, 'topic': topic, "question_level": level})
+                st.session_state.update({'question': question, 'subtopic': subtopic, 'feedback': "", 'unlock_button':True,'select_box':False, 'skill_id':skill_id, 'subject':subject, 'language':language, 'topic': topic, "question_level": level})
                 st.rerun()
     with col2:
         if st.button("Unable to Solve") and st.session_state['unlock_button']:
@@ -71,7 +90,7 @@ with left:
                 correct_answer = get_correct_answer(st.session_state['question'])
                 # st.session_state['feedback'] = f"\n\n{correct_answer}"
                 # st.session_state['score'] = 0
-                st.session_state.update({'feedback': f"\n\n{correct_answer}", 'score':0,'unlock_button':False})
+                st.session_state.update({'feedback': f"\n\n{correct_answer}", 'score':0,'unlock_button':False, 'select_box':True,'subject': "Any"})
                 store_result(st.session_state['conn'], st.session_state['question'], "Unable to Solve", correct_answer, st.session_state['score'], st.session_state['skill_id'])
                 st.rerun()
     with col3:
@@ -81,23 +100,23 @@ with left:
                 # st.session_state['feedback'] = f"\n\n{feedback}"
                 # st.session_state['score'] = score
                 store_result(st.session_state['conn'], st.session_state['question'], st.session_state['code'], feedback, score, st.session_state['skill_id'])
-                st.session_state.update({'feedback': f"\n\n{feedback}", 'score':score,'unlock_button':False})
+                st.session_state.update({'feedback': f"\n\n{feedback}", 'score':score,'unlock_button':False,'select_box':True, 'subject': "Any"})
                 st.rerun()
 
-    # st.subheader("Question")
-    st.write(f"Level: {st.session_state['question_level']}")
+    # st.subheader("Question")# and st.session_state['subject'] != "Any"
+    if st.session_state['unlock_button']:
+        st.write(f"Subject: {st.session_state['subject']}")
+        st.write(f"Topic: {st.session_state['topic']} - Subtopic: {st.session_state['subtopic']}")
+        st.write(f"Level: [{st.session_state['question_level']}]")
     st.write(f"{st.session_state['question']}")
 
 with right:
     st.write("### Write Your Code Below:")
-    if (st.session_state['subject'] == "Any"):
-        indx = 1
-    else:
-        indx = list(set(get_language_from_skill().values())).index(st.session_state['language'])
+    indx = list(set(get_language_from_skill().values())).index(st.session_state['language'])
     st.session_state['language'] = st.selectbox(f"Select coding language here",set(get_language_from_skill().values()), index = indx)
     st.write(f"Current language is {st.session_state['language']}")
     # code_editor = st_ace(language=get_language_from_skill().get(language, "plaintext"), theme="monokai", key="code_editor", height=500)
-    code_editor = st_ace(language=st.session_state['language'],value="", theme="monokai", key="code_editor", height=500, auto_update=True,show_gutter=True)
+    code_editor = st_ace(language=st.session_state['language'],value="", theme="monokai", key="code_editor", height=500, auto_update=True,show_gutter=True, placeholder="Enter code here")
     st.session_state['code'] = code_editor
 
 

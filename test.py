@@ -1,5 +1,1 @@
-import random
-lst = [("hello", 1), ("bye",2), ("guyz",3)]
-
-random.shuffle(lst)
-print(lst)
+print([1,2] + [4,5])

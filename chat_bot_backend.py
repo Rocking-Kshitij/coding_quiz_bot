@@ -40,7 +40,7 @@ def setup_database(conn):  # now
             subtopic TEXT,
             content TEXT,
             importance INTEGER CHECK (importance BETWEEN 0 AND 10),
-            performance INTEGER CHECK (performance BETWEEN 0 AND 10) DEFAULT 0,
+            performance INTEGER CHECK (performance BETWEEN 0 AND 100) DEFAULT 0,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             vector_tags vector(768),
             UNIQUE (subject, topic, subtopic)
@@ -138,7 +138,10 @@ def get_next_skill(conn, subject):  # returns subject, topic
     best_score = float('-inf')
 
         # Weight factors
-    w1, w2, w3 = 1.5, 0.1, 0.01
+    w1, w2, w3 = 1.0, 0.1, 0.05
+    # imp cale -10 range 0-10
+    # per scale -100 range 0-10
+    #timedecay 0-5
     
     for skillid, importance, performance, updated_at in skills:
         time_decay = (now - updated_at).days if updated_at else 100  # Older updates are prioritized
@@ -190,12 +193,15 @@ def get_feedback(question, user_answer):
     feedback = feedback_chain.invoke({"question": question, "user_answer": user_answer})
     try:
         rating = rating_chain.invoke({"question": question, "user_answer": user_answer, "feedback": feedback})
+        # rating = rating_chain.invoke({"question": question, "user_answer": user_answer})
     except:
         rating = rating_chain.invoke({"question": question, "user_answer": user_answer, "feedback": feedback})
-    rating_json = get_dict_result(rating)
+    rating = int(get_dict_result(rating)["rating_score"])
     # feedback, rating
     # log_conversation(feedback_prompt, response)
-    return feedback, int(rating_json["rating_score"])
+    rating = int(min(rating *1.2, 100))
+    
+    return feedback, rating
 
 # Function to store result in the database
 def store_result(conn, question, user_answer, feedback, rating, skill_id):
@@ -203,7 +209,7 @@ def store_result(conn, question, user_answer, feedback, rating, skill_id):
     # user_answer = user_answer.replace("\"", '\\"')
     # feedback = feedback.replace("\"", '\\"')
         # Store the question, answer, and feedback in the database
-    vector_data = embeddings.embed_documents([question + feedback])[0]
+    vector_data = embeddings.embed_query(question + feedback)
     cursor = conn.cursor()
     ## Inserting in questionbank
     cursor.execute(
@@ -217,7 +223,7 @@ def store_result(conn, question, user_answer, feedback, rating, skill_id):
     cursor.execute("SELECT performance FROM Skills WHERE skillid = %s", (skill_id,))
     current_performance = cursor.fetchone()[0]
     #70% weight is given to the current performance in the skills table. 30% weight is assigned to the new rating received from the LLM.
-    new_performance = round((current_performance * 0.9) + (rating * 0.1), 2)
+    new_performance = round((current_performance * 0.7) + (rating * 0.3), 2)
     cursor.execute(
         """
         UPDATE Skills
@@ -241,13 +247,14 @@ def store_result(conn, question, user_answer, feedback, rating, skill_id):
     similar_skills = cursor.fetchall()
     
     for similar_skill_id, similar_performance, similarity in similar_skills:
-        similarity_weight = max(0, 1 - similarity)  # Convert distance to similarity score
+        similarity_weight = max(0, 1 - similarity) * 0.03  # Convert distance to similarity score and limiting it to avoid large change rating * 0.1 * 0.3
         updated_performance = round((similar_performance * (1 - similarity_weight)) + (rating * similarity_weight), 2)
+        # updated_performance = round((similar_performance *0.7)+ ((similar_performance * (1 - similarity_weight)) + (rating * similarity_weight))*0.3, 2)
         cursor.execute(
             """
             UPDATE Skills
             SET performance = %s, updated_at = CURRENT_TIMESTAMP
-            WHERE skillid = %s
+            WHERE skillid = %s.
             """,
             (updated_performance, similar_skill_id)
         )

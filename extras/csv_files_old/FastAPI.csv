@@ -1,0 +1,25 @@
+subject,topic,subtopic,content,importance
+FastAPI,FastAPI Fundamentals,Setting up FastAPI Project,,10
+FastAPI,Routing & URL Handling,Defining Routes & Path Operations (CRUD),,10
+FastAPI,Routing & URL Handling,Handling Path and Query Parameters,,10
+FastAPI,Request Handling,Validating Request Body with Pydantic Models,,10
+FastAPI,Request Handling,Handling Form Data and File Uploads,,9
+FastAPI,Response Handling,Structuring JSON & Custom Response Models,,10
+FastAPI,Data Validation,Data Validation with Pydantic Models,,10
+FastAPI,Data Validation,Implementing Nested Models & Custom Validation,,9
+FastAPI,Error Handling,Raising HTTP Exceptions (HTTPException),,10
+FastAPI,Error Handling,Defining Custom Error Handlers,,9
+FastAPI,Dependency Injection,Using Dependency Injection for Reusability,,10
+FastAPI,Security & Authentication,Implementing OAuth2 with JWT Authentication,,10
+FastAPI,Security & Authentication,Securing APIs with API Keys and Bearer Tokens,,9
+FastAPI,Security & Authentication,Password Hashing and Authentication Best Practices,,9
+FastAPI,Middleware & Background Tasks,Creating and Using Middleware,,9
+FastAPI,Middleware & Background Tasks,Running Background Tasks in FastAPI,,9
+FastAPI,Asynchronous Programming,Implementing Async & Await in FastAPI,,10
+FastAPI,Asynchronous Programming,Async Database Operations with SQLAlchemy/Tortoise,,10
+FastAPI,Database Integration,"Connecting FastAPI to SQL Databases (PostgreSQL, MySQL)",,10
+FastAPI,Database Integration,Managing Database Transactions & Sessions,,10
+FastAPI,Testing & Debugging,Writing Unit Tests for FastAPI Routes,,10
+FastAPI,Testing & Debugging,Using TestClient for Integration Testing,,10
+FastAPI,Deployment & Scaling,Deploying FastAPI with Uvicorn & Gunicorn,,10
+FastAPI,Deployment & Scaling,Dockerizing FastAPI Applications,,10
