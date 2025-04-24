@@ -19,15 +19,14 @@ def update_skills_from_csv(conn, embeddings, csv_folder):
                 
                 cursor.execute(
                     """
-                    INSERT INTO Skills (subject, topic, subtopic, content, importance, performance, vector_tags)
-                    VALUES (%s, %s, %s, %s, %s, 0, %s)
+                    INSERT INTO Skills (subject, topic, subtopic, importance, performance, vector_tags)
+                    VALUES (%s, %s, %s, %s, 0, %s)
                     ON CONFLICT (subject, topic, subtopic) DO UPDATE 
-                    SET content = EXCLUDED.content,
-                        importance = EXCLUDED.importance,
+                    SET importance = EXCLUDED.importance,
                         updated_at = CURRENT_TIMESTAMP,
                         vector_tags = EXCLUDED.vector_tags;
                     """,
-                    (row['subject'], row['topic'], row.get('subtopic', None), row.get('content', None), row['importance'], vector_embedding)
+                    (row['subject'], row['topic'], row.get('subtopic', None), row['importance'], vector_embedding)
                 )
     
     conn.commit()

@@ -3,7 +3,7 @@ import json, atexit
 from langchain_core.prompts import PromptTemplate
 import streamlit.components.v1 as components
 from streamlit_ace import st_ace
-from chat_bot_backend import get_question, store_result, get_correct_answer,get_feedback, setup_database
+from chat_bot_backend import get_question, store_result,get_feedback, setup_database, get_question_data, get_rating
 from chatbotconfig import get_connection
 
 language_list = ["Python", "Bash", "FastAPI", "Streamlit", "Django"]
@@ -24,15 +24,20 @@ def get_language_from_skill():
         "Docker": "dockerfile",
         "Kubernetes": "yaml",
         "Terraform": "terraform",
+        "JavaScript": "javascript",
+        "React": "javascript",
         # "Ansible": "yaml",
         # "GitHub Actions": "yaml",
         # "Apache Airflow (Python)": "python",
         # "Git": "sh",
         "Pyspark": "python"
+
     }
 
 # Initialize session state
-for key in ['question', 'skill_id', 'skill_name', 'feedback', 'subtopic', 'topic', 'unlock_button', "code", 'subject', 'language', 'score', 'conn', "question_level", "select_box"]:
+for key in ['question', 'answer', 'question_data','skill_id', 'skill_name', 'feedback', 'question_id'\
+     'subtopic', 'topic', 'unlock_button', "code", 'subject',\
+         'language', 'score', 'conn', "question_level", "select_box", "locked_subject"]:
     if key not in st.session_state:
         if key == 'conn':
             st.session_state[key] = get_connection()
@@ -73,42 +78,44 @@ with left:
         st.session_state['subject'] = st.selectbox(f"Current Subject here",n_list)
         st.session_state['language'] = get_language_from_skill().get(st.session_state['subject'])
     else:
-        index = n_list.index(st.session_state['subject'])
-        st.session_state['subject'] = st.selectbox(f"Current Subject here",n_list, index=index)
+        # index = n_list.index(st.session_state['subject'])
+        st.session_state['subject'] = st.selectbox(f"Current Subject here",n_list, index=n_list.index(st.session_state['subject']))
         st.session_state['language'] = get_language_from_skill().get(st.session_state['subject'])
         
     with col1:
         if st.button("Get a Question"):
             with st.spinner("Fetching the question"):
-                question, skill_id, subject, topic, subtopic, level = get_question(st.session_state['conn'],st.session_state['subject'])
+                question, skill_id, subject, topic, subtopic, level, answer, q_id = get_question(st.session_state['conn'],st.session_state['subject'])
                 language = get_language_from_skill().get(subject)
-                st.session_state.update({'question': question, 'subtopic': subtopic, 'feedback': "", 'unlock_button':True,'select_box':False, 'skill_id':skill_id, 'subject':subject, 'language':language, 'topic': topic, "question_level": level})
+                # question_data = get_question_data(question, answer)
+                question_data = ""
+                st.session_state.update({'question': question, 'subtopic': subtopic, 'feedback': "", 'unlock_button':True,'select_box':False, 'skill_id':skill_id,\
+                     'subject':subject, 'language':language, 'topic': topic, "question_level": level, "answer":answer, "question_data":question_data, "question_id":q_id, "locked_subject": subject})
                 st.rerun()
     with col2:
         if st.button("Unable to Solve") and st.session_state['unlock_button']:
             with st.spinner("Fetching the feedback"):
-                correct_answer = get_correct_answer(st.session_state['question'])
-                # st.session_state['feedback'] = f"\n\n{correct_answer}"
-                # st.session_state['score'] = 0
-                st.session_state.update({'feedback': f"\n\n{correct_answer}", 'score':0,'unlock_button':False, 'select_box':True,'subject': "Any"})
-                store_result(st.session_state['conn'], st.session_state['question'], "Unable to Solve", correct_answer, st.session_state['score'], st.session_state['skill_id'])
+                st.session_state.update({'feedback': f"\n\n{st.session_state['answer']}", 'score':0,'unlock_button':False, 'select_box':True,'subject': "Any"})
+                store_result(st.session_state['conn'], st.session_state['question'], "Unable to Solve", st.session_state['answer'], st.session_state['score'], st.session_state['skill_id'], st.session_state['question_id'])
                 st.rerun()
     with col3:
         if st.button("Submit Answer") and st.session_state['unlock_button'] and len(st.session_state['code'])!=0:
             with st.spinner("Fetching the feedback"):
-                feedback, score = get_feedback(st.session_state['question'], st.session_state['code'])
+                score = get_rating(st.session_state['question'], st.session_state['code'])
+                feedback = st.session_state['answer']
                 # st.session_state['feedback'] = f"\n\n{feedback}"
                 # st.session_state['score'] = score
-                store_result(st.session_state['conn'], st.session_state['question'], st.session_state['code'], feedback, score, st.session_state['skill_id'])
+                store_result(st.session_state['conn'], st.session_state['question'], st.session_state['code'], st.session_state['answer'], score, st.session_state['skill_id'], st.session_state['question_id'])
                 st.session_state.update({'feedback': f"\n\n{feedback}", 'score':score,'unlock_button':False,'select_box':True, 'subject': "Any"})
                 st.rerun()
 
     # st.subheader("Question")# and st.session_state['subject'] != "Any"
-    if st.session_state['unlock_button']:
-        st.write(f"Subject: {st.session_state['subject']}")
+    if st.session_state['question']!="":
+        st.write(f"Subject: {st.session_state['locked_subject']}")
         st.write(f"Topic: {st.session_state['topic']} - Subtopic: {st.session_state['subtopic']}")
         st.write(f"Level: [{st.session_state['question_level']}]")
-    st.write(f"{st.session_state['question']}")
+        st.write(f"{st.session_state['question']}")
+        # st.expander("Get the Data").write(f"\n{st.session_state['question_data']}")
 
 with right:
     st.write("### Write Your Code Below:")

@@ -1,7 +1,9 @@
-select * from skills order by skillid;
-select * from questionbank order by question_id
-
+select * from skills order by skillid limit 1;
+select * from questionbank order by created_at desc limit 0
+select * from questionbank where is_asked = false
 select distinct subject from skills;
+
+select * from Subject_Importance
 
 select * from skills where performance > 0 order by performance desc;
 
@@ -10,6 +12,9 @@ select subject, avg(performance) from skills group by subject;
 
 Update skills
 set performance = 0, updated_at = current_timestamp
+
+update questionbank
+set is_asked = true
 
 
 --check activity
@@ -48,3 +53,6 @@ FROM pg_stat_activity
 -- ALTER TABLE Skills DROP CONSTRAINT skills_performance_check;
 
 -- ALTER TABLE Skills ADD CONSTRAINT skills_performance_check CHECK (performance BETWEEN 0 AND 100);
+
+alter table questionbank
+add column is_asked boolean default false;

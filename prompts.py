@@ -112,32 +112,82 @@ answer_prompt = PromptTemplate(
 )
 answer_chain = answer_prompt | llm
 
-feedback_prompt = PromptTemplate(
-    input_variable={"question": "question", "user_answer": "user_answer"},
-    template = """Evaluate the following answer for the given question. Provide detailed feedback including correctness, improvements, and best practices.
-    Note that:
-    1) Provide the correct answer for the following question in detailed and easy to easy to understand manner.
-    2) Ignore slight syntax mistakes like spaces, slight misspells, slight bracket misallignment, not providing comments etc.
-    
+get_question_data_prompt = PromptTemplate(
+    input_variable = {"question": "question", "answer": "answer"},
+    template = """Provide all the Data required by user in one place while coding the solution. Only include the data in clear and concise format.
     <Asked Question start here tag>
     {question}
     <Asked Question ends here tag>
 
+    <Expected answer to the question starts here tag>
+    {answer}
+    <<Expected answer to the question ends here tag>
+
+    Aggregate the Data required by the user in concise organised format to solve the above question for the correct answer.
+    The Data can include:
+        1. Links/ folder paths
+        2. variables names to be used.
+        3. any specific details about the question
+        4. shouldnt include specific syntax details / commands details
+        etc
+    """
+)
+
+get_question_data_chain = get_question_data_prompt | llm
+
+feedback_prompt = PromptTemplate(
+    input_variable={"question": "question", "user_answer": "user_answer", "answer":"answer"},
+    template = """Evaluate the following answer for the given question. Provide detailed feedback including correctness, improvements, and best practices.
+    Note that:
+    1) Provide the correct answer for the following question in detailed and easy to easy to understand manner.
+    2) Ignore slight syntax mistakes like spaces, slight misspells, slight bracket misallignment, not providing comments etc.
+    3) At last provide the Rating in given format.
+
+    <Asked Question start here tag>
+    {question}
+    <Asked Question ends here tag>
+
+    <expected answer start here tag>
+    {answer}
+    <expected answer start here tag>
+
     <user answer start here tag>
     {user_answer}
     <user answer ends here tag>
+
+    At last Provide the rating to user based on his answer in range 0-100. Dont use decimal digits (Whole Numbers only). No knowledge means 0 and correct answer means 100.
+    If the answer is correct and satisfactory then rating_score should be 100.
+
+    Note that:
+    1) Analyze the question and the answer and provide the rating to the answer in range 0-100 accordingly.
+    2) No knowledge and complete knowledge gap means 0 rating and satisfactory and correct answer means 100.
+    3) Rating should reflect the grasp of user on the concept from 0-100.
+    4) Ignore slight syntax mistakes like spaces, slight misspells, slight bracket misallignment, not providing comments etc.
+
+    Follow below instructions for output format:
+    First Provide the feedback and then end the output  with rating_score in the json format as mentioned below:
+
+    {{
+    "rating_score":"Score to user in range (0-100) according to the output provided."
+    }}
     """
 )
 feedback_chain = feedback_prompt | llm
 
 rating_prompt = PromptTemplate(
     # input_variable={"question": "question", "user_answer": "user_answer"},
-    input_variable={"question": "question", "user_answer": "user_answer", "feedback":"feedback"},
+    input_variable={"question": "question", "user_answer": "user_answer"},
     template = """Provide the rating to user based on his answer in range 0-100. Dont use decimal digits (Whole Numbers only). No knowledge means 0 and correct answer means 100.
     If the answer is correct and satisfactory then rating_score should be 100.
+
+    <Asked Question start here tag>
     Question was : {question}
-    This was the feedback already provided to user : {feedback}
-    This was the user's answer: {user_answer}
+    <Asked Question ends here tag>
+
+    <user answer start here tag>
+    {user_answer}
+    <user answer ends here tag>
+    
     Note that:
     1) Analyze the question and the answer and provide the rating to the answer in range 0-100 accordingly.
     2) No knowledge and complete knowledge gap means 0 rating and satisfactory and correct answer means 100.
