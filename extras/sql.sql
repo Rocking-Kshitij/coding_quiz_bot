@@ -1,9 +1,24 @@
 select * from skills order by skillid limit 1;
-select * from questionbank order by created_at desc limit 0
-select * from questionbank where is_asked = false
-select distinct subject from skills;
+select * from questionbank order by created_at desc limit 1
 
-select * from Subject_Importance
+select * from questionbank where is_asked = false
+
+select skills.subject, count(questionbank.skillid) from questionbank join skills on questionbank.skillid = skills.skillid
+where questionbank.is_asked = false group by skills.subject
+
+select skills.subject, count(questionbank.question_id), avg(skills.performance)  from questionbank join skills on questionbank.skillid = skills.skillid
+where skills.performance > 0 group by skills.subject
+
+
+
+
+select distinct subject from skills;
+select * from skills where performance >0 order by performance desc
+select * from skills order by subject
+
+select * from skills where content IS NOT NULL
+ALTER TABLE skills RENAME COLUMN "Content" TO content;
+select * from subject_importance
 
 select * from skills where performance > 0 order by performance desc;
 

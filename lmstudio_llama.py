@@ -5,6 +5,8 @@ from langchain_core.language_models.llms import LLM
 from langchain_core.outputs import GenerationChunk
 from openai import OpenAI
 from langchain_core.embeddings import Embeddings
+from ollama import Client
+import time, requests
 # this class connects to lmstudio and implements it in langchain
 
 class CustomLLamaLLM(LLM):
@@ -23,7 +25,7 @@ class CustomLLamaLLM(LLM):
         output = client.chat.completions.create(
             model=self.llama_model,
             messages = history,
-            temperature=0.7,
+            temperature=0.8,
         ).choices[0].message.content
         if kwargs.get('prompt_show') == True:
             return output, prompt
@@ -141,3 +143,93 @@ class CustomEmbedding(Embeddings):
     # async def aembed_query(self, text: str) -> List[float]:
     #     """Asynchronous Embed query text."""
     #     ...
+
+
+
+class OllamaCustomLLamaLLM(LLM):
+    model: str
+    url:str
+
+    def _call(
+        self,
+        prompt: str,
+        stop: Optional[List[str]] = None,
+        run_manager: Optional[CallbackManagerForLLMRun] = None,
+        **kwargs: Any,
+    ) -> str:
+        client = Client(host = self.url)
+
+        history = [{"role": "user", "content": prompt}]
+        output = client.chat(model=self.model, messages=[
+              {
+                'role': 'user',
+                'content': prompt,
+              },
+            ])['message']['content']
+        if kwargs.get('prompt_show') == True:
+            return output, prompt
+        else:
+            return output
+
+    @property
+    def _identifying_params(self) -> Dict[str, Any]:
+        """Return a dictionary of identifying parameters."""
+        return {
+            # The model name allows users to specify custom token counting
+            # rules in LLM monitoring applications (e.g., in LangSmith users
+            # can provide per token pricing for their model and monitor
+            # costs for the given LLM.)
+            "model_name": "ollama_remote",
+        }
+
+    @property
+    def _llm_type(self) -> str:
+        """Get the type of language model used by this chat model. Used for logging purposes only."""
+        return "custom"
+
+
+
+
+class OllamaCustomFastAPILLM(LLM):
+    model: str
+    url:str
+    sleep_time:int
+
+    def _call(
+        self,
+        prompt: str,
+        stop: Optional[List[str]] = None,
+        run_manager: Optional[CallbackManagerForLLMRun] = None,
+        **kwargs: Any,
+    ) -> str:
+        params = {"question": prompt, "model": self.model}
+        i = 0
+        for i in range(20): # check for message 20 times
+            response = requests.get(self.url, params=params).json()
+            if response["status"] == "processing":
+                i+=1
+            else:
+                output = response["message"]
+                break
+            time.sleep(self.sleep_time) # check every 20 s for result
+        i = 0
+        if kwargs.get('prompt_show') == True:
+            return output, prompt
+        else:
+            return output
+
+    @property
+    def _identifying_params(self) -> Dict[str, Any]:
+        """Return a dictionary of identifying parameters."""
+        return {
+            # The model name allows users to specify custom token counting
+            # rules in LLM monitoring applications (e.g., in LangSmith users
+            # can provide per token pricing for their model and monitor
+            # costs for the given LLM.)
+            "model_name": "ollama_fastapi",
+        }
+
+    @property
+    def _llm_type(self) -> str:
+        """Get the type of language model used by this chat model. Used for logging purposes only."""
+        return "custom"

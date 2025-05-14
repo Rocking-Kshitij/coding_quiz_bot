@@ -1,10 +1,11 @@
 import numpy as np
-from chatbotconfig import llm, get_connection, embeddings, csv_folder, log_conversation
-import sqlite3, json, random
-from prompts import beginner_question_chain,easy_question_chain,medium_question_chain,hard_question_chain,answer_chain, feedback_chain, rating_chain, get_question_data_chain
+from chatbotconfig import llm_heavy, llm_light, get_connection, embeddings, csv_folder, log_conversation
+import sqlite3, json, random, statistics
+from qwen3prompts import beginner_question_chain,easy_question_chain,medium_question_chain,hard_question_chain,answer_chain, feedback_chain, rating_chain, get_question_data_chain
 import pandas as pd
 from datetime import datetime
 import threading, time
+from heapq import nlargest
 
 get_question_created_thread = None
 get_question_created_lock = threading.Lock()
@@ -106,7 +107,7 @@ def update_skills_from_csv(conn, embeddings, csv_folder):
     print("Skills table updated from CSV files.")
 
 
-def get_next_skill(conn, subject):  # returns subject, topic
+def get_next_skill(conn, subject, top_n=1):  # returns subject, topic
     """
     Determines the next skill ID to ask a question from based on importance, performance, and recency.
     """
@@ -125,7 +126,8 @@ def get_next_skill(conn, subject):  # returns subject, topic
             # """
             """
             SELECT 
-            s.skillid, 
+            s.skillid,
+            s.subject,
             s.importance AS skill_importance, 
             s.performance, 
             s.updated_at,
@@ -145,7 +147,8 @@ def get_next_skill(conn, subject):  # returns subject, topic
             # """
             """
             SELECT 
-            s.skillid, 
+            s.skillid,
+            s.subject,
             s.importance AS skill_importance, 
             s.performance, 
             s.updated_at,
@@ -164,71 +167,101 @@ def get_next_skill(conn, subject):  # returns subject, topic
         return None
     else:
         random.shuffle(skills)
+    sub_perf = dict()
+    for skillid, subject, importance, performance, updated_at, subject_importance in skills:
+        if subject not in sub_perf.keys():
+            sub_perf[subject] = [0]
+        if performance >0:
+            sub_perf[subject].append(performance)
+
+
     
-    best_skill = None
-    best_score = float('-inf')
+    # best_skill = None
+    # best_score = float('-inf')
+    top_skills = []  # Will hold tuples of (skillid, score)
 
         # Weight factors
-    w1, w2, w3, w4 = 1.0, 0.1, 0.05, 2.0
+    w1, w2, w3 = 0.01, 0.1, 0.05
     # imp cale -10 range 0-10
     # per scale -100 range 0-10
-    #timedecay 0-5
+    #sub_imp 0-100
+    #timedecay 100 days -> 10 pts
     
-    for skillid, importance, performance, updated_at, subject_importance in skills:
+    for skillid, subject, importance, performance, updated_at, subject_importance in skills:
         time_decay = (now - updated_at).days if updated_at else 100  # Older updates are prioritized
-        score = (importance * w1) - (performance * w2) + (time_decay * w3) + (subject_importance * w4)
-        
-        if score > best_score:
-            best_score = score
-            best_skill = skillid
+        avg_sub_perf = statistics.mean(sub_perf[subject])
+        score = (importance * subject_importance * w1) - (performance * w2) - (avg_sub_perf * w2)+ (time_decay * w3) + 20  # max 40 = 10 -10 -10 + 10 + 10
+        top_skills.append((skillid, score))
+        # if score > best_score:
+        #     best_score = score
+        #     best_skill = skillid
+
+    top_skills = sorted(top_skills, key=lambda x: x[1], reverse=True)[:top_n]
+    print(top_skills)
+
+    skill_ids = [skillid for skillid, _ in top_skills]
+    format_strings = ','.join(['%s'] * len(skill_ids))
+
+    cursor.execute(f"SELECT skillid, subject, topic, subtopic, performance FROM Skills WHERE skillid IN ({format_strings})", skill_ids)
+    skill = cursor.fetchall()
     
         # Fetch skill details
-    cursor.execute("SELECT subject, topic, subtopic, performance FROM Skills WHERE skillid = %s", (best_skill,))
-    skill = cursor.fetchone()
+    # cursor.execute("SELECT subject, topic, subtopic, performance FROM Skills WHERE skillid = %s", (best_skill,))
+    # skill = cursor.fetchone()
     if not skill:
         print("Skill ID not found in database.")
         return
-    subject, topic, subtopic, performance = skill
-    cursor.close()
-    return subject, topic, subtopic, best_skill, performance
 
-def get_question_created(conn, subject):
+    # print(skill)
+    # subject, topic, subtopic, performance = skill
+    cursor.close()
+    return skill
+
+def get_question_created(conn, subject, n_questions):
     cursor = conn.cursor()
     if subject == "All":
-
         cursor.execute(
-            """
-            SELECT subject
+            f"""
+            SELECT subject, COUNT(q.question_id) AS question_count
             FROM skills s
             LEFT JOIN questionbank q ON s.skillid = q.skillid AND q.is_asked = false
             GROUP BY subject
-            HAVING COUNT(q.question_id) <= 1;
+            HAVING COUNT(q.question_id) < {n_questions};
             """     
         )
-        subjects = cursor.fetchall()
+        result = cursor.fetchall()
+        subjects = []
+        for sub, n in result:
+            subjects.append([sub, n_questions-n])
+        print(subjects)
     else:
-        subjects = [[subject]]
+        subjects = [[subject , n_questions]]
     if subjects:
-        for subject in subjects:
-            print(f"generating for {subject[0]}", flush = True)
-            question, best_skill, subject, topic, subtopic, level = get_act_question(conn, subject[0])
-            answer = get_correct_answer(question)
-            data =  get_question_data(question, answer)
-            vector_data = embeddings.embed_query(question + answer)
-            cursor.execute(
-                """
-                INSERT INTO QuestionBank (question, vector_data, actual_answer, skillid, level)
-                VALUES (%s, %s, %s, %s, %s)
-                """,
-                (question, vector_data, answer, best_skill, level)
-            )
-            # conn.commit()
-            print(f"{subject} done", flush = True)
-    conn.commit()
+        for subject, n in subjects:
+            print(f"generating for {subject}", flush = True)
+            first_time = datetime.now()
+            question_list = get_act_question(conn, subject, n)
+            for question, best_skill, subject, topic, subtopic, level in question_list:
+                answer = get_correct_answer(question)
+                # data =  get_question_data(question, answer)
+                vector_data = embeddings.embed_query(question + answer)
+                cursor.execute(
+                    """
+                    INSERT INTO QuestionBank (question, vector_data, actual_answer, skillid, level)
+                    VALUES (%s, %s, %s, %s, %s)
+                    """,
+                    (question, vector_data, answer, best_skill, level)
+                )
+                # conn.commit()
+                later_time = datetime.now()
+                elapsed_minutes = (later_time - first_time).total_seconds() / 60
+                conn.commit()
+                print(f"Time to generate question from {subject}: {elapsed_minutes:.2f} minutes", flush=True)
     cursor.close()
             
 def get_question(conn, subject):
-    subject, topic, subtopic, best_skill, performance = get_next_skill(conn, subject)
+    skill = get_next_skill(conn, subject)
+    best_skill, subject, topic, subtopic, performance = skill[0]
     cur = conn.cursor()
     query = """
             SELECT 
@@ -255,45 +288,72 @@ def get_question(conn, subject):
     if result:
         question, actual_answer, skillid, subject, topic, subtopic, level, q_id = result
     else:
-        get_question_created(conn, subject)
+        get_question_created(conn, subject, 1)
         cur.execute(query, (subject,))
         result = cur.fetchone()
         question, actual_answer, skillid, subject, topic, subtopic, level, q_id = result
 
     cur.close()
 
-    global get_question_created_thread
-    # creating a thread for all subjects data
-    with get_question_created_lock:
-        if get_question_created_thread is None or not get_question_created_thread.is_alive():
-            print("Starting background thread", flush=True)
-            get_question_created_thread = threading.Thread(target=get_question_created, args = (conn, "All"), daemon=True)
-            get_question_created_thread.start()
-        else:
-            print("background thread is already running", flush=True)
-            # it means thread is already running
     return question,best_skill,subject,topic, subtopic, level, actual_answer, q_id
     #
 
+def initiate_thread(conn):
+    global get_question_created_thread
+    # creating a thread for all subjects data
+    cursor = conn.cursor()
+    should_create = False # checks if there a subject for which there is no question ready
+    cursor.execute(
+            """
+            SELECT subject
+            FROM skills s
+            LEFT JOIN questionbank q ON s.skillid = q.skillid AND q.is_asked = false
+            GROUP BY subject
+            HAVING COUNT(q.question_id) <= 1;
+            """     
+        )
+    subjects = cursor.fetchall()
+    cursor.close()
+    if subjects:
+        if len(subjects) > 0:
+            print(f"Subject which need to be created {subjects} initiate_thread", flush = True)
+            should_create = True
+    # should_create = True # uncomment to manually trigger question creation
+    # else:
+    #     print(f"No need to create question", flush = True)
+    with get_question_created_lock:
+        if (get_question_created_thread is None or not get_question_created_thread.is_alive()) and should_create:
+            print("Starting background thread", flush=True)
+            get_question_created_thread = threading.Thread(target=get_question_created, args = (conn, "All", 10), daemon=True)  # conn, create for all, n question for each sub
+            get_question_created_thread.start()
+        # else:
+        #     print("background thread is already running", flush=True)
+        #     # it means thread is already running
+
 # Function to get question from LLM based on past performance
-def get_act_question(conn, subject):  # work to get coding language too
-    subject, topic, subtopic, best_skill, performance = get_next_skill(conn, subject)
-    score = int(performance)
-    if score <25:
-        level = "Beginner level"
-        question = beginner_question_chain.invoke({"subject": subject, "topic":topic, "subtopic":subtopic, "level": level})
-    elif score <50:
-        level = "Easy level"
-        question = easy_question_chain.invoke({"subject": subject, "topic":topic, "subtopic":subtopic, "level": level})
-    elif score <75:
-        level = "Medium level"
-        question = medium_question_chain.invoke({"subject": subject, "topic":topic, "subtopic":subtopic, "level": level})
-    else:
-        level = "Hard level"
-        question = hard_question_chain.invoke({"subject": subject, "topic":topic, "subtopic":subtopic, "level": level})
+def get_act_question(conn, subject , n):  # work to get coding language too
+    skill = get_next_skill(conn, subject , n)
+    questions = []
+    for item in skill:
+        best_skill, subject, topic, subtopic, performance = item
+        score = int(performance)
+        if score <25:
+            level = "Beginner level"
+            question = beginner_question_chain.invoke({"subject": subject, "topic":topic, "subtopic":subtopic, "level": level})
+        elif score <50:
+            level = "Easy level"
+            question = easy_question_chain.invoke({"subject": subject, "topic":topic, "subtopic":subtopic, "level": level})
+        elif score <75:
+            level = "Medium level"
+            question = medium_question_chain.invoke({"subject": subject, "topic":topic, "subtopic":subtopic, "level": level})
+        else:
+            level = "Hard level"
+            question = hard_question_chain.invoke({"subject": subject, "topic":topic, "subtopic":subtopic, "level": level})
+        print("question_generated", flush = True)
+        questions.append([question, best_skill, subject, topic, subtopic, level])
     # question = question_chain.invoke({"subject": subject, "topic":topic, "subtopic":subtopic, "level": get_hardness(performance)})
     # log_conversation(idea_prompt, response)
-    return question, best_skill, subject, topic, subtopic, level
+    return questions
 
 
 # Function to get correct answer from LLM
@@ -312,33 +372,19 @@ def get_rating(question, user_answer):
     try:
         rating = int(json.loads(rating)["rating_score"])
     except:
-        print("got error while fetching feedback and rating")
-        print(rating)
         feedback, rating = get_dict_result(rating)
         rating = int(rating["rating_score"])
     # feedback, rating
     # log_conversation(feedback_prompt, response)
-    rating = int(min(rating *1.2, 100))
+    rating = int(min(rating *1.1, 100))
+    print(rating)
 
     return rating
 
 # Function to evaluate the answer
 def get_feedback(question, user_answer, answer):
     feedback = feedback_chain.invoke({"question": question, "user_answer": user_answer, "answer":answer})
-    org_feedback = feedback
-    try:
-        # rating = rating_chain.invoke({"question": question, "user_answer": user_answer, "feedback": feedback})
-        feedback, rating = get_dict_result(feedback)
-        rating = int(get_dict_result(rating)["rating_score"])
-    except:
-        print("got error while fetching feedback and rating")
-        print(org_feedback)
-    rating = int(get_dict_result(rating)["rating_score"])
-    # feedback, rating
-    # log_conversation(feedback_prompt, response)
-    rating = int(min(rating *1.2, 100))
-    
-    return feedback, rating
+    return feedback
 
 # Function to store result in the database
 def store_result(conn, question, user_answer, feedback, rating, skill_id, question_id):
@@ -387,7 +433,7 @@ def store_result(conn, question, user_answer, feedback, rating, skill_id, questi
     similar_skills = cursor.fetchall()
     print(f"Updated skills {similar_skills}")
     for similar_skill_id, similar_performance, similarity in similar_skills:
-        similarity_weight = max(0, 1 - similarity) * 0.03  # Convert distance to similarity score and limiting it to avoid large change rating * 0.1 * 0.3
+        similarity_weight = max(0, 1 - similarity) * 0.3 * 0.5  # Convert distance to similarity score and limiting it to avoid large change rating * 0.3 * (0.3) last can be varied for senstivity
         updated_performance = round((similar_performance * (1 - similarity_weight)) + (rating * similarity_weight), 2)
         # updated_performance = round((similar_performance *0.7)+ ((similar_performance * (1 - similarity_weight)) + (rating * similarity_weight))*0.3, 2)
         cursor.execute(

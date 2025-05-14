@@ -3,10 +3,10 @@ import json, atexit
 from langchain_core.prompts import PromptTemplate
 import streamlit.components.v1 as components
 from streamlit_ace import st_ace
-from chat_bot_backend import get_question, store_result,get_feedback, setup_database, get_question_data, get_rating
+from chat_bot_backend import get_question, store_result,get_feedback, setup_database, get_question_data, get_rating, initiate_thread
 from chatbotconfig import get_connection
 
-language_list = ["Python", "Bash", "FastAPI", "Streamlit", "Django"]
+# language_list = ["Python", "Bash", "FastAPI", "Streamlit", "Django"]
 # Function to map skill name to programming language
 def get_language_from_skill():
     # Subject : language
@@ -18,7 +18,7 @@ def get_language_from_skill():
         # "Streamlit": "python",
         # "Django": "django",
         "SQL": "sql",
-        # "PyTorch": "python",
+        "Pytorch": "python",
         # "Kafka (Python)": "python",
         # "MongoDB": "sql",
         "Docker": "dockerfile",
@@ -28,7 +28,7 @@ def get_language_from_skill():
         "React": "javascript",
         # "Ansible": "yaml",
         # "GitHub Actions": "yaml",
-        # "Apache Airflow (Python)": "python",
+        "Apache Airflow (Python)": "python",
         # "Git": "sh",
         "Pyspark": "python"
 
@@ -41,6 +41,7 @@ for key in ['question', 'answer', 'question_data','skill_id', 'skill_name', 'fee
     if key not in st.session_state:
         if key == 'conn':
             st.session_state[key] = get_connection()
+            initiate_thread(st.session_state[key])
         elif key == 'unlock_button':
             st.session_state[key] = False
         elif key == 'select_box':
@@ -91,6 +92,7 @@ with left:
                 question_data = ""
                 st.session_state.update({'question': question, 'subtopic': subtopic, 'feedback': "", 'unlock_button':True,'select_box':False, 'skill_id':skill_id,\
                      'subject':subject, 'language':language, 'topic': topic, "question_level": level, "answer":answer, "question_data":question_data, "question_id":q_id, "locked_subject": subject})
+                initiate_thread(st.session_state['conn'])
                 st.rerun()
     with col2:
         if st.button("Unable to Solve") and st.session_state['unlock_button']:
@@ -102,7 +104,8 @@ with left:
         if st.button("Submit Answer") and st.session_state['unlock_button'] and len(st.session_state['code'])!=0:
             with st.spinner("Fetching the feedback"):
                 score = get_rating(st.session_state['question'], st.session_state['code'])
-                feedback = st.session_state['answer']
+                feedback = get_feedback(st.session_state['question'], st.session_state['code'], st.session_state['answer'])
+                feedback = f"{feedback} \n\n\n\n {st.session_state['answer']}"
                 # st.session_state['feedback'] = f"\n\n{feedback}"
                 # st.session_state['score'] = score
                 store_result(st.session_state['conn'], st.session_state['question'], st.session_state['code'], st.session_state['answer'], score, st.session_state['skill_id'], st.session_state['question_id'])
@@ -123,7 +126,7 @@ with right:
     st.session_state['language'] = st.selectbox(f"Select coding language here",set(get_language_from_skill().values()), index = indx)
     st.write(f"Current language is {st.session_state['language']}")
     # code_editor = st_ace(language=get_language_from_skill().get(language, "plaintext"), theme="monokai", key="code_editor", height=500)
-    code_editor = st_ace(language=st.session_state['language'],value="", theme="monokai", key="code_editor", height=500, auto_update=True,show_gutter=True, placeholder="Enter code here")
+    code_editor = st_ace(language=st.session_state['language'],value="", theme="monokai", key="code_editor", height=700, auto_update=False,show_gutter=True, placeholder="Enter code here")
     st.session_state['code'] = code_editor
 
 
@@ -134,7 +137,7 @@ if st.session_state['feedback'] !="":
     st.subheader("Feedback")
     st.write(f"Current score is: {st.session_state['score']}")
     st.write(f"{st.session_state['feedback']}")
-    st.session_state['score'] = ""
+    # st.session_state['score'] = ""
 
 # st.session_state['conn'].close()
 # # setup_database(conn)
