@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://unpkg.com/streamlit-component-lib@1.4.0/dist/index.js"></script>
+    <script>
+      window.addEventListener("load", function () {
+        console.log("✅ JS loaded");
+
+        const waitForStreamlit = () => {
+          if (window.Streamlit) {
+            console.log("✅ Streamlit object found");
+
+            Streamlit.setComponentReady();
+            Streamlit.setFrameHeight();
+
+            const selectedText = window.getSelection().toString();
+            console.log("✅ Selected text:", selectedText);
+
+            Streamlit.setComponentValue(selectedText);
+          } else {
+            console.log("❌ Waiting for Streamlit...");
+            setTimeout(waitForStreamlit, 100);
+          }
+        };
+
+        waitForStreamlit();
+      });
+    </script>
+  </head>
+  <body>
+    <p>Select some text and click the Streamlit button.</p>
+  </body>
+</html>
