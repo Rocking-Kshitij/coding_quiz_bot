@@ -8,6 +8,8 @@ __pycache__/
 /csv_files
 /csv*
 csv_*/
+csv_files/
+csv_files_old/
 
 # Distribution / packaging
 .Python
