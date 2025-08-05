@@ -7,7 +7,7 @@ __pycache__/
 *.so
 /csv_files
 /csv*
-csv_*
+csv_*/
 
 # Distribution / packaging
 .Python
