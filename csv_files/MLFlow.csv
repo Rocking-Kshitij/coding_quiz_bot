@@ -1,0 +1,21 @@
+subject,topic,subtopic,importance
+MLFlow,MLflow Projects,MLproject File Structure,8
+MLFlow,MLflow Projects,Running Projects Locally & Remotely,8
+MLFlow,MLflow Projects,Dependency Management (Conda/Docker),7
+MLFlow,Experiment Tracking,"Experiments, Runs, Parameters, Metrics",10
+MLFlow,Experiment Tracking,"Logging Artifacts (models, files, visualizations)",10
+MLFlow,Experiment Tracking,"Autologging (scikit-learn, TensorFlow, etc.)",9
+MLFlow,Model Management,"Model Flavors and Format (sklearn, Python, etc.)",9
+MLFlow,Model Management,"Model Logging, Loading & Inference",10
+MLFlow,Model Management,Using Model Signature and Input Examples,8
+MLFlow,Model Management,Custom Python Models,9
+MLFlow,Model Registry,Managing Model Versions via API,9
+MLFlow,Model Deployment,Serving Models via MLflow REST API,9
+MLFlow,Model Deployment,Docker-based Deployment,8
+MLFlow,CI/CD Integration,Automating Workflows (GitHub Actions / Jenkins),9
+MLFlow,MLflow API Usage,"MLflow Python API (log_param, log_metric, etc.)",10
+MLFlow,MLflow API Usage,Tracking & Registry APIs,9
+MLFlow,MLflow API Usage,REST API for Automation,8
+MLFlow,Best Practices,Debugging Issues & Environment Conflicts,9
+MLFlow,Advanced Features,DSPy Integration and Logging Evaluations,7
+MLFlow,MLflow 3.0 Preview Topics,API Changes: artifact_path ? name (Model Logging),7

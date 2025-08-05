@@ -1,25 +1,15 @@
-subject,topic,subtopic,content,importance
-Pyspark,Introduction to PySpark,Overview & Key Features,,10
-Pyspark,Introduction to PySpark,"PySpark Architecture (Driver, Executors, Cluster Manager)",,10
-Pyspark,Introduction to PySpark,"PySpark Ecosystem (RDD, DataFrame, SQL, Streaming, MLlib)",,10
-Pyspark,PySpark Setup & Configuration,Installing & Configuring PySpark (Local & Cluster),,9
-Pyspark,PySpark Setup & Configuration,SparkSession & SparkContext,,10
-Pyspark,PySpark Core Concepts,"RDDs: Definition, Properties, Transformations & Actions",,10
-Pyspark,PySpark Core Concepts,Lazy Evaluation & DAG (Directed Acyclic Graph),,9
-Pyspark,PySpark Core Concepts,"RDD Partitioning, Persistence & Parallelism",,10
-Pyspark,PySpark DataFrame API,DataFrame vs RDDs,,10
-Pyspark,PySpark DataFrame API,"Creating & Loading DataFrames (CSV, JSON, Parquet, Database)",,10
-Pyspark,PySpark DataFrame API,"DataFrame Operations (Filtering, Aggregation, Sorting)",,10
-Pyspark,PySpark DataFrame API,User-Defined Functions (UDFs & Pandas UDFs),,10
-Pyspark,PySpark SQL & Query Optimization,"SQL Queries on DataFrames, Window Functions, Joins",,10
-Pyspark,PySpark SQL & Query Optimization,Catalyst Optimizer & Query Execution Plans,,10
-Pyspark,PySpark SQL & Query Optimization,"Broadcast Joins, Data Skew & Shuffle Optimization",,10
-Pyspark,PySpark Streaming (Structured Streaming),"Basics, Stateful Processing, Aggregations & Watermarking",,10
-Pyspark,PySpark Streaming (Structured Streaming),Streaming Fault Tolerance (Checkpointing & Recovery),,9
-Pyspark,PySpark MLlib (Machine Learning),Feature Engineering & Vectorization,,9
-Pyspark,PySpark MLlib (Machine Learning),"Classification, Regression & Clustering Models",,9
-Pyspark,PySpark Performance Optimization,"Partitioning, Bucketing & Broadcast Joins",,10
-Pyspark,PySpark Performance Optimization,Caching & Checkpointing for Performance,,9
-Pyspark,PySpark Performance Optimization,"Resource Management & Tuning (Executor, Memory, Parallelism)",,10
-Pyspark,PySpark Debugging & Monitoring,"Debugging PySpark Jobs, Spark UI & Job Monitoring",,10
-Pyspark,Deploying PySpark Applications,"Submitting Spark Jobs & Running on YARN, Kubernetes",,9
+subject,topic,subtopic,importance
+Pyspark,PySpark Core Concepts,"RDDs: Definition, Properties, Transformations & Actions",10
+Pyspark,PySpark Core Concepts,"RDD Partitioning, Persistence & Parallelism",10
+Pyspark,PySpark DataFrame API,"Creating & Loading DataFrames (CSV, JSON, Parquet, Database)",10
+Pyspark,PySpark DataFrame API,"DataFrame Operations (Filtering, Aggregation, Sorting)",10
+Pyspark,PySpark DataFrame API,User-Defined Functions (UDFs & Pandas UDFs),10
+Pyspark,PySpark SQL & Query Optimization,"SQL Queries on DataFrames, Window Functions, Joins",10
+Pyspark,PySpark Streaming (Structured Streaming),"Basics, Stateful Processing, Aggregations & Watermarking",10
+Pyspark,PySpark MLlib (Machine Learning),Feature Engineering & Vectorization,9
+Pyspark,PySpark MLlib (Machine Learning),"Classification, Regression & Clustering Models",9
+Pyspark,PySpark Performance Optimization,"Partitioning, Bucketing & Broadcast Joins",10
+Pyspark,PySpark Performance Optimization,Caching & Checkpointing for Performance,9
+Pyspark,PySpark Debugging & Monitoring,"Debugging PySpark Jobs, Spark UI & Job Monitoring",10
+Pyspark,Latest PySpark Features (Spark 3.5+),Python User-Defined Table Functions (UDTFs),9
+Pyspark,Latest PySpark Features (Spark 3.5+),Pandas API Enhancements in PySpark,8

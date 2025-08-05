@@ -1,64 +1,40 @@
-from chatbotconfig import get_connection, embeddings
-from chat_bot_backend import get_question, get_dict_result, get_next_skill
-import time, json
-from datetime import datetime
-from chatbotconfig import llm
-from langchain_core.prompts import PromptTemplate
+from chatbotconfig import embeddings
 
+from chatbotconfig import get_connection
 
 conn = get_connection()
-# # # verify_question_created(conn)
-# # subject = "FastAPI"
-# # question, skill_id, subject, topic, subtopic, level, answer = get_question(conn, subject)
-# # for item in [question, skill_id, subject, topic, subtopic, level, answer]:
-# #     print(item)
-# #     print("---------------------------------------")
-# #     time.sleep(10)
-# cursor = conn.cursor()
-
-# cursor.execute(
-#     """
-#     SELECT skillid, subject, topic, subtopic
-#     FROM Skills
-#     WHERE content IS NULL
-#     """
-# )
-
-# skills = cursor.fetchall()
-
-# temp_prompt = PromptTemplate(
-#     # subject, topic, subtopic
-#     input_variable={"subject": "subject", "topic":"topic", "subtopic":"subtopic"},
-#     template="""Create related coding examples for below item :
-#         subject : {subject}
-#         topic : {topic}
-#         subtopic : {subtopic}
-#     """
-# )
-# query_save = """
-#         UPDATE Skills
-#         SET vector_tags = %s, content = %s
-#         WHERE skillid = %s
-# """
+cursor = conn.cursor()
 
 
-# chain = temp_prompt | llm
-# n = len(skills)
-# i = 0
-# for skill_id, subject, topic, subtopic  in skills:
-#     i = i+1
-#     print(f"{i} / {n} {subject} {skill_id}", flush=True)
-#     content = chain.invoke({"subject": subject, "topic": topic, "subtopic":subtopic})
-#     vector_embedding = embeddings.embed_query(f"{subject} {topic} {subtopic} {content}")
-#     cursor.execute(query_save, (vector_embedding, content, skill_id))
-#     conn.commit()
+def remove_thoughts(input):
+    data = input[input.rfind('</think>')+10:]
+    return data
 
-# cursor.close()
-# conn.close()
-# subject, topic, subtopic, best_skill, performance = get_next_skill(conn, "Any")[0]
-# print(subject, topic, subtopic, best_skill, performance)
+cursor.execute(
+        """
+        SELECT skillid, subject, topic, subtopic, content
+        FROM Skills
+        WHERE content LIKE '<think>%';
+        """
+        
+)
 
-subjects = [["all" , 4]]
+rows = cursor.fetchall()
 
-for subject, n in subjects:
-    print(subject, n)
+for skillid, subject, topic, subtopic, content in rows:
+    new_content = remove_thoughts(content)
+    text_data = f"{subject} {topic} {subtopic} {new_content}"
+    vector_embedding = embeddings.embed_query(text_data)
+    cursor.execute("""
+        UPDATE Skills
+        SET vector_tags = %s,
+            content = %s
+        WHERE skillid = %s;
+    """, (vector_embedding, new_content, skillid))
+    print(".", end = "", flush=True)
+
+
+conn.commit()
+cursor.close()
+conn.close()
+print("done", flush= True)

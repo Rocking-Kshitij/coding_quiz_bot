@@ -1,13 +1,12 @@
-subject,topic,subtopic,content,importance
-Docker,Docker Basics,"Writing and Executing Docker Commands (build, run, exec, ps, logs)",,10
-Docker,Docker Basics,Understanding Docker Architecture & Components,,10
-Docker,Docker Image Management,Writing Optimized Dockerfiles (Syntax & Best Practices),,10
-Docker,Docker Image Management,Multi-Stage Builds for Efficient Images,,9
-Docker,Docker Image Management,"Building, Tagging, and Pushing Docker Images to Registries",,9
-Docker,Working with Containers,"Creating, Running & Stopping Containers",,10
-Docker,Working with Containers,"Managing Container Lifecycle (Start, Stop, Restart, Remove)",,9
-Docker,Working with Containers,"Debugging Containers (Logs, Inspect, CrashLoopBackOff)",,10
-Docker,Working with Containers,Managing Persistent Data with Docker Volumes,,9
-Docker,Docker Networking,Creating and Using Custom Docker Networks,,9
-Docker,Docker Networking,Exposing & Mapping Container Ports,,9
-Docker,Docker Compose,Writing docker-compose.yml for Multi-Container Applications,,10
+subject,topic,subtopic,importance
+Docker,Docker Fundamentals,"Docker CLI Commands (build, run, exec, etc.)",10
+Docker,Docker Images,Dockerfile Syntax and Best Practices,10
+Docker,Docker Images,Multi-Stage Builds,9
+Docker,Docker Images,"Building, Tagging, and Pushing Docker Images",9
+Docker,Docker Containers,Creating and Running Containers,10
+Docker,Docker Containers,"Container Lifecycle Management (Start, Stop, Restart)",9
+Docker,Docker Containers,Container Networking,9
+Docker,Docker Containers,Data Volumes and Persistent Storage,9
+Docker,Docker Containers,Docker Compose (Multi-Container Applications),9
+Docker,Docker Networking,"Docker Network Types (Bridge, Host, Overlay)",9
+Docker,Docker Security,Docker Security Best Practices,10

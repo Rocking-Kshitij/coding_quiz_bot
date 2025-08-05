@@ -1,9 +1,12 @@
 
-from chatbotconfig import embeddings, csv_folder, get_connection, llm
+from chatbotconfig import embeddings, csv_folder, get_connection, llm_heavy
 from langchain_core.prompts import PromptTemplate
 import pandas as pd
 import os
+import time
+from qwen3prompts import create_example_chain
 
+llm = llm_heavy
 conn = get_connection()
 
 temp_prompt = PromptTemplate(
@@ -15,12 +18,15 @@ temp_prompt = PromptTemplate(
         subtopic : {subtopic}
     """
 )
-chain = temp_prompt | llm
+# chain = temp_prompt | llm
+chain  = create_example_chain
 
 done_subs = """
             SELECT distinct subject
             FROM skills
             """
+
+executing = True
 
 def update_skills_from_csv(conn, embeddings, csv_folder):
     cursor = conn.cursor()
@@ -37,7 +43,14 @@ def update_skills_from_csv(conn, embeddings, csv_folder):
             for _, row in df.iterrows():
                 if row['subject'] in subjects:
                     break
-                content = chain.invoke({"subject": row['subject'], "topic": row['topic'], "subtopic":row.get('subtopic', '')})
+                executing = True
+                while executing:
+                    try:
+                        content = chain.invoke({"subject": row['subject'], "topic": row['topic'], "subtopic":row.get('subtopic', '')})
+                        executing = False
+                    except:
+                        print("Retrying")
+                        time.sleep(30)
                 text_data = f"{row['subject']} {row['topic']} {row.get('subtopic', '')} {content}"
                 vector_embedding = embeddings.embed_query(text_data)
                 
@@ -53,10 +66,13 @@ def update_skills_from_csv(conn, embeddings, csv_folder):
                     (row['subject'], row['topic'], row.get('subtopic', None), row['importance'], vector_embedding, content)
                 )
     
-    conn.commit()
+            conn.commit()
     cursor.close()
     conn.close()
     print("Skills table updated from CSV files.")
 
 
+
 update_skills_from_csv(conn, embeddings, csv_folder)
+
+print("Execution Completed")

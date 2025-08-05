@@ -12,9 +12,10 @@ deepseek_r1 = "deepseek-r1-distill-qwen-7b"
 deepseek_r1 = "deepseek-r1-distill-qwen-7b"
 qwen3_8b = "qwen3-8b"
 ollama_qwen3_30b = "qwen3:30b"
-llm_heavy = OllamaCustomFastAPILLM(model = ollama_qwen3_30b, url = "https://9uae56br3tt3x8-8000.proxy.runpod.net/ask", sleep_time=15)
+llm_heavy = OllamaCustomFastAPILLM(model = ollama_qwen3_30b, url = "https://t8bl3bx19cn88b-8000.proxy.runpod.net/ask", sleep_time=15)
 # llm_heavy = OllamaCustomLLamaLLM(model = ollama_qwen3_30b, url = "https://2orwypq8zgt3tk-11434.proxy.runpod.net")
 llm_light = CustomLLamaLLM(llama_model=qwen3_8b)
+# embeddings = CustomEmbedding("text-embedding-nomic-embed-text-v1.5@q8_0")
 embeddings = CustomEmbedding("text-embedding-nomic-embed-text-v1.5@q8_0")
 
 

@@ -21,6 +21,7 @@ beginner_question_prompt = PromptTemplate(
     7. Note that the user is provided a single page IDE to write the code. Question should be asked accordingly to be answered in a single file.
     8. Also Provide complete answer with comments explained for user to take assistance from.
     9. Include Explanation of topic in correct, clear, concise and easy to understand language.
+    10. Create coding question for the latest version of tool / application / technology.
     """
 )
 
@@ -39,6 +40,7 @@ easy_question_prompt = PromptTemplate(
     6. Question should include examples, snippets, assistance and hints required to solve the question but shouldnt include complete answer.
     7. Note that the user is provided a single page IDE to write the code. Question should be asked accordingly to be answered in a single file.
     8. Provide required boilerplate to the user.
+    9. Create coding question for the latest version of tool / application / technology.
     """
 )
 
@@ -57,6 +59,7 @@ medium_question_prompt = PromptTemplate(
     6. Question should not include examples, snippets. Question may contain required and necessary hints.
     7. Note that the user is provided a single page IDE to write the code. Question should be asked accordingly to be answered in a single file.
     8. Provide required boilerplate to the user.
+    9. Create coding question for the latest version of tool / application / technology.
     """
 )
 
@@ -75,6 +78,7 @@ hard_question_prompt = PromptTemplate(
     6. Question should not include examples, snippets and unnecessary hints.
     7. Note that the user is provided a single page IDE to write the code. Question should be asked accordingly to be answered in a single file.
     8. Provide required boilerplate to the user.
+    9. Create coding question for the latest version of tool / application / technology.
     """
 )
 
@@ -109,19 +113,19 @@ get_question_data_prompt = PromptTemplate(
 feedback_prompt = PromptTemplate(
     input_variable={"question": "question", "user_answer": "user_answer", "answer":"answer"},
     template = """Evaluate the following answer for the given question. Provide brief feedback including correctness, improvements, and best practices.
-Note that:
-1) Correct answer has already been provided to user as feedback
-2) Ignore slight syntax mistakes like spaces, slight misspells, slight bracket misallignment, not providing comments etc.
-3) Provide the feedback in Short 2-3 lines only.
-<Asked Question start here tag>
-{question}
-<Asked Question ends here tag>
-<expected answer start here tag>
-{answer}
-<expected answer start here tag>
-<user answer start here tag>
-{user_answer}
-<user answer ends here tag>
+    Note that:
+    1) Correct answer has already been provided to user as feedback
+    2) Ignore slight syntax mistakes like spaces, slight misspells, slight bracket misallignment, not providing comments etc.
+    3) Provide the feedback in Short 2-3 lines only.
+    <Asked Question start here tag>
+    {question}
+    <Asked Question ends here tag>
+    <expected answer start here tag>
+    {answer}
+    <expected answer start here tag>
+    <user answer start here tag>
+    {user_answer}
+    <user answer ends here tag>
 /no_think"""
 )
 
@@ -151,6 +155,18 @@ rating_prompt = PromptTemplate(
 /no_think"""
         # This was the feedback already provided to user : {feedback}
 )
+
+temp_prompt = PromptTemplate(
+    # subject, topic, subtopic
+    input_variable={"subject": "subject", "topic":"topic", "subtopic":"subtopic"},
+    template="""Create related coding examples for below item :
+        subject : {subject}
+        topic : {topic}
+        subtopic : {subtopic}
+    """
+)
+
+create_example_chain = temp_prompt | llm_heavy | remove_thoughts
 
 
 beginner_question_chain = beginner_question_prompt | llm_heavy | remove_thoughts

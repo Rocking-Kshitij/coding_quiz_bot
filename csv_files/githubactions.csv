@@ -1,0 +1,30 @@
+subject,topic,subtopic,importance
+GitHub Actions,Error Handling in Workflows,Handling errors and setting retry strategies,8
+GitHub Actions,Jobs and Steps,"Conditional job execution (if, needs)",9
+GitHub Actions,Python in GitHub Actions,Running Python-based tests in workflows,8
+GitHub Actions,Actions,Creating custom actions (JavaScript/Docker),10
+GitHub Actions,Python in GitHub Actions,Writing Python scripts for automation,8
+GitHub Actions,Jobs and Steps,Defining jobs and steps,10
+GitHub Actions,Workflow Events and Triggers,Defining custom events and webhooks,9
+GitHub Actions,Docker and GitHub Actions,Building Docker images in workflows,10
+GitHub Actions,Kubernetes and GitHub Actions,Automating Kubernetes with kubectl and GitHub Actions,9
+GitHub Actions,Terraform and GitHub Actions,Automating infrastructure with Terraform,9
+GitHub Actions,Terraform and GitHub Actions,Managing Terraform state in workflows,9
+GitHub Actions,Docker and GitHub Actions,Using Docker containers for isolation,9
+GitHub Actions,AWS and GitHub Actions,"Deploying to AWS services (EC2, S3, Lambda, etc.)",9
+GitHub Actions,AWS and GitHub Actions,Configuring AWS credentials and secrets,9
+GitHub Actions,YAML Configuration,Writing workflows in YAML,9
+GitHub Actions,Continuous Integration (CI),Setting up CI pipelines for code testing,10
+GitHub Actions,Jobs and Steps,Sequential and parallel job execution,9
+GitHub Actions,Actions,Using GitHub Marketplace actions,9
+GitHub Actions,Continuous Integration (CI),Automating unit and integration testing,9
+GitHub Actions,Continuous Deployment (CD),Automating deployments to cloud platforms,9
+GitHub Actions,Debugging and Monitoring,Debugging failed workflows,9
+GitHub Actions,Debugging and Monitoring,Using logs and annotations for troubleshooting,8
+GitHub Actions,Continuous Integration (CI),Linting and static code analysis in workflows,8
+GitHub Actions,Git Integration,Handling branches and pull requests in workflows,9
+GitHub Actions,Performance Optimization and Caching Strategies,Caching dependencies and build artifacts,9
+GitHub Actions,Secrets and Environment Variables,Using environment variables effectively,8
+GitHub Actions,Introduction to GitHub Actions,"Core Concepts (Workflow, Jobs, Steps)",10
+GitHub Actions,Best Practices in GitHub Actions,Modularizing workflows for maintainability,8
+GitHub Actions,Debugging and Monitoring,Monitoring workflow performance,8

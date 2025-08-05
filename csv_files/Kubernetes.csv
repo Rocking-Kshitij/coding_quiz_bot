@@ -1,21 +1,25 @@
-subject,topic,subtopic,content,importance
-Kubernetes,Kubernetes Basics,Writing and Executing kubectl Commands,,10
-Kubernetes,Kubernetes Core Components,Working with Pods & Pod Lifecycle,,10
-Kubernetes,Kubernetes Core Components,Creating & Managing Deployments and ReplicaSets,,10
-Kubernetes,Kubernetes Core Components,"Writing Kubernetes YAML Manifests (Pods, Deployments, Services)",,10
-Kubernetes,Kubernetes Core Components,"Services in Kubernetes (ClusterIP, NodePort, LoadBalancer)",,9
-Kubernetes,Kubernetes Core Components,Using ConfigMaps & Secrets for Environment Variables,,9
-Kubernetes,Kubernetes Core Components,Persistent Volumes (PVs) & Persistent Volume Claims (PVCs),,9
-Kubernetes,Kubernetes Workloads,StatefulSets vs Deployments,,9
-Kubernetes,Kubernetes Workloads,Running DaemonSets for Background Services,,8
-Kubernetes,Kubernetes Workloads,Scheduling Jobs and CronJobs,,8
-Kubernetes,Kubernetes Networking,Writing & Applying Network Policies,,8
-Kubernetes,Kubernetes Networking,Using Ingress Controllers for Traffic Routing,,9
-Kubernetes,Debugging & Troubleshooting Kubernetes,"Debugging Containers & Pods (Logs, Inspect, CrashLoopBackOff)",,10
-Kubernetes,Kubernetes Scaling & Autoscaling,Writing Horizontal Pod Autoscaler (HPA),,9
-Kubernetes,Kubernetes Scaling & Autoscaling,Configuring Vertical Pod Autoscaler (VPA),,8
-Kubernetes,Kubernetes Monitoring & Logging,Monitoring with Prometheus & Grafana,,9
-Kubernetes,Kubernetes Customization & Advanced Topics,Using Helm for Application Packaging & Deployment,,9
-Kubernetes,Kubernetes Customization & Advanced Topics,Operators & Custom Resource Definitions (CRDs),,8
-Kubernetes,CI/CD with Docker & Kubernetes,Automating Builds & Deployments with Docker & Kubernetes,,10
-Kubernetes,CI/CD with Docker & Kubernetes,Writing Kubernetes Deployment Pipelines in GitHub Actions/Jenkins,,9
+subject,topic,subtopic,importance
+Kubernetes,Kubernetes Fundamentals,Kubernetes CLI (kubectl) Basics,10
+Kubernetes,Kubernetes Core Concepts,Pods and Pod Lifecycle,10
+Kubernetes,Kubernetes Core Concepts,ReplicaSets and Deployments,10
+Kubernetes,Kubernetes Core Concepts,"Services (ClusterIP, NodePort, LoadBalancer)",9
+Kubernetes,Kubernetes Core Concepts,ConfigMaps and Secrets,9
+Kubernetes,Kubernetes Core Concepts,Persistent Volumes (PVs) and Persistent Volume Claims (PVCs),9
+Kubernetes,Kubernetes Core Concepts,StatefulSets,8
+Kubernetes,Kubernetes Core Concepts,DaemonSets,8
+Kubernetes,Kubernetes Core Concepts,Jobs and CronJobs,8
+Kubernetes,Kubernetes Networking,Ingress Controllers and Ingress Resources,9
+Kubernetes,Kubernetes Security,Role-Based Access Control (RBAC),9
+Kubernetes,Kubernetes Security,Secrets Management,9
+Kubernetes,Kubernetes Security,Kubernetes Security Contexts,8
+Kubernetes,Kubernetes Scaling and Monitoring,Horizontal Pod Autoscaling (HPA),9
+Kubernetes,Kubernetes Scaling and Monitoring,Vertical Pod Autoscaling (VPA),8
+Kubernetes,Kubernetes Scaling and Monitoring,Cluster Autoscaling,8
+Kubernetes,Kubernetes Scaling and Monitoring,"Troubleshooting (kubectl logs, describe, etc.)",9
+Kubernetes,Kubernetes Advanced Concepts,Helm and Package Management,9
+Kubernetes,Kubernetes Advanced Concepts,Operators and Custom Resource Definitions (CRDs),8
+Kubernetes,Kubernetes Advanced Concepts,Kubernetes API and Controller Development,8
+Kubernetes,Kubernetes Advanced Concepts,Kustomize,8
+Kubernetes,CI/CD Integration,Docker and Kubernetes in CI/CD Pipelines,10
+Kubernetes,CI/CD Integration,GitHub Actions Integration,9
+Kubernetes,CI/CD Integration,Building and Deploying Applications to Kubernetes,9

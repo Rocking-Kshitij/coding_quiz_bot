@@ -1,52 +1,46 @@
-subject,topic,subtopic,content,importance,importance
-React,React Basics,Component-Based Architecture,,10,
-React,React Basics,JSX and its Syntax Rules,,10,
-React,React Basics,Virtual DOM and Reconciliation,,10,
-React,React Basics,React Rendering and Re-renders,,10,
-React,React Basics,React's Declarative Nature,,9,
-React,React Components,Functional Components,,10,
-React,React Components,"Component Lifecycle (Understanding Mount, Update, Unmount Phases)",,10,
-React,React Components,Props (Passing Data to Components),,10,
-React,React Components,State (Local Component State Management),,10,
-React,React Components,Controlled vs Uncontrolled Components,,9,
-React,React Components,Conditional Rendering,,9,
-React,React Components,Lists and Keys,,10,
-React,React Hooks,useState (State in Functional Components),,10,
-React,React Hooks,useEffect (Handling Side Effects),,10,
-React,React Hooks,useRef (Accessing DOM Elements or Mutable Variables),,9,
-React,React Hooks,Custom Hooks (Creating Reusable Logic),,10,
-React,React Hooks,Rules of Hooks,,10,
-React,React Context API,"Context Creation, Usage, and useContext Hook",,10,
-React,React Context API,Avoiding Prop Drilling,,10,
-React,React Context API,Managing Complex State with Context,,9,
-React,React Router,Basics of React Router,,10,
-React,React Router,Route Configuration and Nested Routes,,10,
-React,React Router,Dynamic Routes and Route Parameters,,10,
-React,React Router,useNavigate and Programmatic Navigation,,9,
-React,React Router,Redirects,,9,
-React,State Management,Lifting State Up,,10,
-React,State Management,Context API as State Management,,10,
-React,State Management,Introduction to Redux,,10,
-React,State Management,Redux Toolkit,,10,
-React,State Management,Asynchronous Actions with Redux Thunk or Redux Saga,,9,
-React,Performance Optimization,React.memo and Avoiding Re-renders,,10,
-React,Performance Optimization,useMemo and useCallback,,10,
-React,Performance Optimization,"Lazy Loading (React.lazy, Suspense)",,10,
-React,Performance Optimization,Code Splitting with Webpack,,9,
-React,Styling in React,CSS Modules,,9,
-React,Styling in React,Styled-components,,9,
-React,Styling in React,Basics of CSS-in-JS,,8,
-React,Testing in React,Unit Testing with Jest,,10,
-React,Testing in React,Integration Testing with React Testing Library,,10,
-React,Testing in React,Mocking API Calls,,9,
-React,Testing in React,Testing Hooks,,9,
-React,API Integration,Fetching Data with Fetch,,9,
-React,API Integration,Fetching Data with Axios,,9,
-React,API Integration,Handling Loading States and Errors,,10,
-React,API Integration,Implementing Pagination and Infinite Scroll,,9,
-React,Error Handling,Error Boundaries,,10,
-React,React Portals,Creating and Using Portals,,9,
-React,Advanced Concepts,Server-Side Rendering (SSR),,10,
-React,Advanced Concepts,Static Site Generation (SSG),,10,
-React,Advanced Concepts,React Fiber and Concurrent Rendering,,9,
-React,Advanced Concepts,React Suspense for Data Fetching,,10,
+subject,topic,subtopic,importance
+React,React Basics,JSX and its Syntax Rules,10
+React,React Basics,React Rendering and Re-renders,10
+React,React Components,Functional Components,10
+React,React Components,"Component Lifecycle (Understanding Mount, Update, Unmount Phases)",10
+React,React Components,Props (Passing Data to Components),10
+React,React Components,State (Local Component State Management),10
+React,React Components,Controlled vs Uncontrolled Components,9
+React,React Components,Conditional Rendering,9
+React,React Components,Lists and Keys,10
+React,React Hooks,useState (State in Functional Components),10
+React,React Hooks,useEffect (Handling Side Effects),10
+React,React Hooks,useRef (Accessing DOM Elements or Mutable Variables),9
+React,React Hooks,Custom Hooks (Creating Reusable Logic),10
+React,React Hooks,Rules of Hooks,10
+React,React Context API,"Context Creation, Usage, and useContext Hook",10
+React,React Router,Basics of React Router,10
+React,React Router,Route Configuration and Nested Routes,10
+React,React Router,Dynamic Routes and Route Parameters,10
+React,React Router,useNavigate and Programmatic Navigation,9
+React,React Router,Redirects,9
+React,State Management,Lifting State Up,10
+React,State Management,Context API as State Management,10
+React,State Management,Introduction to Redux,10
+React,State Management,Redux Toolkit,10
+React,State Management,Asynchronous Actions with Redux Thunk or Redux Saga,9
+React,Performance Optimization,React.memo and Avoiding Re-renders,10
+React,Performance Optimization,useMemo and useCallback,10
+React,Performance Optimization,"Lazy Loading (React.lazy, Suspense)",10
+React,Performance Optimization,Code Splitting with Webpack,9
+React,Styling in React,CSS Modules,9
+React,Styling in React,Styled-components,9
+React,Styling in React,Basics of CSS-in-JS,8
+React,Testing in React,Unit Testing with Jest,10
+React,Testing in React,Integration Testing with React Testing Library,10
+React,Testing in React,Mocking API Calls,9
+React,Testing in React,Testing Hooks,9
+React,API Integration,Fetching Data with Fetch,9
+React,API Integration,Fetching Data with Axios,9
+React,API Integration,Handling Loading States and Errors,10
+React,API Integration,Implementing Pagination and Infinite Scroll,9
+React,Error Handling,Error Boundaries,10
+React,React Portals,Creating and Using Portals,9
+React,Advanced Concepts,Server-Side Rendering (SSR),10
+React,Advanced Concepts,Static Site Generation (SSG),10
+React,Advanced Concepts,React Suspense for Data Fetching,10

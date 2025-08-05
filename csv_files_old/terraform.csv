@@ -1,0 +1,43 @@
+subject,topic,subtopic,content,importance
+Terraform,Introduction to Terraform & IaC,What is Terraform?,,10
+Terraform,Introduction to Terraform & IaC,Infrastructure as Code (IaC) & Benefits,,10
+Terraform,Introduction to Terraform & IaC,Terraform vs CloudFormation vs Ansible,,9
+Terraform,Introduction to Terraform & IaC,How Terraform Works (Declarative Model),,10
+Terraform,Setting Up Terraform,Installing Terraform & CLI Basics,,9
+Terraform,Setting Up Terraform,"Terraform CLI Commands (init, plan, apply, destroy)",,10
+Terraform,Setting Up Terraform,"Configuring Providers (AWS, Azure, GCP)",,10
+Terraform,Setting Up Terraform,Managing Terraform Versions,,8
+Terraform,Terraform Core Concepts,"Terraform Configuration Files (.tf, .tfvars)",,10
+Terraform,Terraform Core Concepts,"Providers, Resources, and Data Sources",,10
+Terraform,Terraform Core Concepts,"Input Variables (variable, locals)",,10
+Terraform,Terraform Core Concepts,Output Values (output),,9
+Terraform,Terraform State Management,Understanding terraform.tfstate,,10
+Terraform,Terraform State Management,"Remote State Storage (S3, Terraform Cloud)",,10
+Terraform,Terraform State Management,State Locking & Security Considerations,,10
+Terraform,Terraform State Management,Handling State Drift & Best Practices,,10
+Terraform,Essential Terraform Commands,"terraform fmt, validate, refresh",,9
+Terraform,Essential Terraform Commands,"terraform import, taint, state",,9
+Terraform,Essential Terraform Commands,Debugging & Troubleshooting Terraform,,9
+Terraform,Terraform Expressions & Functions,Variable Precedence & Type Constraints,,10
+Terraform,Terraform Expressions & Functions,"Terraform Built-in Functions (String, Numeric, Collections)",,9
+Terraform,Terraform Expressions & Functions,Dynamic Blocks & for_each,,10
+Terraform,Terraform Expressions & Functions,"Conditional Expressions (count, for, lookup)",,9
+Terraform,Structuring Terraform Code,Writing Clean & Reusable Terraform Code,,10
+Terraform,Structuring Terraform Code,Terraform Modules (Creating & Using),,10
+Terraform,Structuring Terraform Code,Best Practices for Module Structure,,9
+Terraform,Managing Multiple Environments,Terraform Workspaces & Use Cases,,9
+Terraform,Managing Multiple Environments,Environment-Specific Configurations,,9
+Terraform,Terraform Resource Dependencies,Implicit vs Explicit Dependencies,,10
+Terraform,Terraform Resource Dependencies,Handling depends_on Properly,,9
+Terraform,Terraform with AWS,Setting up AWS Provider,,10
+Terraform,Terraform with AWS,"Managing AWS Resources (EC2, S3, IAM, RDS)",,10
+Terraform,Terraform with AWS,IAM Role & Policy Management in Terraform,,10
+Terraform,Terraform with AWS,"Networking with Terraform (VPC, Subnets, Security Groups)",,10
+Terraform,Terraform with CI/CD,Automating Terraform Deployments,,10
+Terraform,Terraform with CI/CD,GitHub Actions for Terraform,,9
+Terraform,Terraform with CI/CD,Handling Secrets Securely in CI/CD,,10
+Terraform,Terraform Security Best Practices,Secure Variable Handling (Sensitive Data),,10
+Terraform,Terraform Security Best Practices,"Secret Management (AWS Secrets Manager, HashiCorp Vault)",,10
+Terraform,Terraform Security Best Practices,Least Privilege & IAM Best Practices,,10
+Terraform,Terraform Performance & Optimization,Optimizing Terraform Plan & Apply Time,,9
+Terraform,Terraform Performance & Optimization,Best Practices for Large-Scale Deployments,,9

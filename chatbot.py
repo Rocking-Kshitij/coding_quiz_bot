@@ -6,6 +6,9 @@ from streamlit_ace import st_ace
 from chat_bot_backend import get_question, store_result,get_feedback, setup_database, get_question_data, get_rating, initiate_thread
 from chatbotconfig import get_connection
 
+
+
+
 # language_list = ["Python", "Bash", "FastAPI", "Streamlit", "Django"]
 # Function to map skill name to programming language
 def get_language_from_skill():
@@ -26,11 +29,13 @@ def get_language_from_skill():
         "Terraform": "terraform",
         "JavaScript": "javascript",
         "React": "javascript",
-        # "Ansible": "yaml",
-        # "GitHub Actions": "yaml",
+        "Ansible": "yaml",
+        "GitHub Actions": "yaml",
         "Apache Airflow (Python)": "python",
         # "Git": "sh",
-        "Pyspark": "python"
+        "Pyspark": "python",
+        "MLFlow":"python",
+        "KubeFlow":"python"
 
     }
 
@@ -58,7 +63,7 @@ for key in ['question', 'answer', 'question_data','skill_id', 'skill_name', 'fee
 # Streamlit UI
 st.set_page_config(layout="wide")
 st.title("Coding Practice Chatbot")
-st.markdown("---")
+st.markdown("---", unsafe_allow_html=True)
 left, right = st.columns([1.2, 1.8])
 
 with left:

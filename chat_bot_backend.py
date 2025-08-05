@@ -324,7 +324,7 @@ def initiate_thread(conn):
     with get_question_created_lock:
         if (get_question_created_thread is None or not get_question_created_thread.is_alive()) and should_create:
             print("Starting background thread", flush=True)
-            get_question_created_thread = threading.Thread(target=get_question_created, args = (conn, "All", 10), daemon=True)  # conn, create for all, n question for each sub
+            get_question_created_thread = threading.Thread(target=get_question_created, args = (conn, "All", 5), daemon=True)  # conn, create for all, n question for each sub
             get_question_created_thread.start()
         # else:
         #     print("background thread is already running", flush=True)

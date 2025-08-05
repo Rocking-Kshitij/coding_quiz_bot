@@ -1,0 +1,27 @@
+subject,topic,subtopic,importance
+KubeFlow,Notebook Environments,"Customizing Images (PyTorch, SDKs, AWS CLI)",10
+KubeFlow,Notebook Environments,Mounting External Storage (AWS S3 via PVCs or FUSE),9
+KubeFlow,Pipelines - Authoring,Kubeflow Pipelines (KFP) Architecture & DSL v2,10
+KubeFlow,Pipelines - Authoring,Writing Components as ContainerOps,10
+KubeFlow,Pipelines - Authoring,Creating Reusable Pipelines,10
+KubeFlow,Pipelines - Authoring,"Input/Output Management, Caching, Artifact Handling",10
+KubeFlow,Pipelines - Execution,"Running, Scheduling, and Managing Pipelines",10
+KubeFlow,Pipelines - Execution,Pipeline Versioning & Parameterization,9
+KubeFlow,Pipelines - Execution,Debugging & Monitoring Pipeline Runs,9
+KubeFlow,Training Integration,PyTorchJob Operator: Concepts and Usage,10
+KubeFlow,Training Integration,Integrating PyTorch Training with Kubeflow Pipelines,10
+KubeFlow,Training Integration,Data Preprocessing Steps as Pipeline Components,9
+KubeFlow,Hyperparameter Tuning,Katib Architecture & Custom Search Spaces,10
+KubeFlow,Hyperparameter Tuning,Katib with PyTorchJob + Pipeline Integration,10
+KubeFlow,Hyperparameter Tuning,Early Stopping and Metric Monitoring,8
+KubeFlow,Experiment Tracking,MLflow Setup with Kubeflow Pipelines,10
+KubeFlow,Experiment Tracking,"Logging Params, Metrics, and Artifacts from Pipelines",10
+KubeFlow,Experiment Tracking,"Comparing Experiments, Reproducing Runs",9
+KubeFlow,Model Deployment (KServe),"KServe Architecture, InferenceService CRDs",10
+KubeFlow,Model Deployment (KServe),Serving PyTorch Models on KServe,10
+KubeFlow,Model Deployment (KServe),"Deploying with Autoscaling, Canary, and Revisions",9
+KubeFlow,CI/CD Automation,GitHub Actions Workflow to Deploy Pipelines,10
+KubeFlow,CI/CD Automation,CI/CD for PyTorch Models: Build ? Train ? Serve,10
+KubeFlow,CI/CD Automation,Secret and Credential Management via GitHub + AWS,9
+KubeFlow,Capstone Project,Real-World Project: Train + Tune + Track + Serve,10
+KubeFlow,Capstone Project,Full Stack CI/CD + EKS Deployment,10

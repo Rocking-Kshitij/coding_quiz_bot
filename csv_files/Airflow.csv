@@ -1,36 +1,28 @@
-subject,topic,subtopic,content,importance
-Apache Airflow (Python),Introduction to Apache Airflow,Overview of Apache Airflow,,9
-Apache Airflow (Python),Introduction to Apache Airflow,Airflow Architecture,,10
-Apache Airflow (Python),Introduction to Apache Airflow,"Core Components (Scheduler, Executors, Workers, Webserver, Metadata DB)",,10
-Apache Airflow (Python),Installation and Setup,Installing Apache Airflow (Standalone & Production),,10
-Apache Airflow (Python),Installation and Setup,"Configuring Metadata Database (SQLite, MySQL, PostgreSQL)",,9
-Apache Airflow (Python),Installation and Setup,"Installation Best Practices (Docker, Virtualenv, Systemd)",,9
-Apache Airflow (Python),Installation and Setup,Setting Up Airflow for Production,,10
-Apache Airflow (Python),Core Concepts,Directed Acyclic Graphs (DAGs),,10
-Apache Airflow (Python),Core Concepts,"Operators (PythonOperator, BashOperator, etc.)",,10
-Apache Airflow (Python),Core Concepts,Task Dependencies and Trigger Rules,,10
-Apache Airflow (Python),Core Concepts,Scheduling Workflows with Cron and Timetables,,10
-Apache Airflow (Python),Writing and Managing Workflows,Writing a Basic DAG,,10
-Apache Airflow (Python),Writing and Managing Workflows,Using Common Operators,,10
-Apache Airflow (Python),Writing and Managing Workflows,Creating Custom Operators,,9
-Apache Airflow (Python),Writing and Managing Workflows,Dynamic and Parameterized DAGs,,10
-Apache Airflow (Python),Writing and Managing Workflows,Handling Task Failures and Retries,,10
-Apache Airflow (Python),Writing and Managing Workflows,XComs and Data Passing Between Tasks,,10
-Apache Airflow (Python),Scheduling and Execution,"Executors Overview (Local, Celery, Kubernetes)",,10
-Apache Airflow (Python),Scheduling and Execution,Backfill and Catchup Behavior,,10
-Apache Airflow (Python),Scheduling and Execution,Parallelism and Concurrency Management,,10
-Apache Airflow (Python),Scheduling and Execution,Task Queues and Prioritization,,9
-Apache Airflow (Python),Scheduling and Execution,High Availability and Scaling (Includes KubernetesExecutor),,10
-Apache Airflow (Python),Monitoring and Debugging,Monitoring DAG Runs and Tasks in Web UI,,10
-Apache Airflow (Python),Monitoring and Debugging,Debugging DAG Failures Using Logs,,10
-Apache Airflow (Python),Monitoring and Debugging,Managing and Rotating Logs,,8
-Apache Airflow (Python),Advanced Topics,Cross-DAG Dependencies,,10
-Apache Airflow (Python),Advanced Topics,DAG Versioning and Change Management,,9
-Apache Airflow (Python),Advanced Topics,Best Practices for DAG Design,,10
-Apache Airflow (Python),Advanced Topics,High Availability and Scaling (Merged KubernetesExecutor Topic),,10
-Apache Airflow (Python),Integrations,"Integrating Airflow with Databases (MySQL, PostgreSQL)",,10
-Apache Airflow (Python),Integrations,"Cloud Integration (AWS, GCP, Azure)",,10
-Apache Airflow (Python),Integrations,"Big Data Tools Integration (Spark, Hive, Hadoop)",,10
-Apache Airflow (Python),Testing and CI/CD,Unit Testing for DAGs and Tasks,,10
-Apache Airflow (Python),Testing and CI/CD,Mocking Airflow Components for Tests,,9
-Apache Airflow (Python),Testing and CI/CD,CI/CD Pipeline for DAG Deployment,,10
+subject,topic,subtopic,importance
+Apache Airflow (Python),DAG Authoring & Scheduling,DAG Structure & Syntax,10
+Apache Airflow (Python),DAG Authoring & Scheduling,Task Dependencies & Trigger Rules,10
+Apache Airflow (Python),DAG Authoring & Scheduling,"Scheduling with Intervals, Cron, Custom Timetables",10
+Apache Airflow (Python),DAG Authoring & Scheduling,"Retry, SLA, Timeout, Priority Weights",9
+Apache Airflow (Python),DAG Authoring & Scheduling,TaskFlow API (Functional DAGs),9
+Apache Airflow (Python),DAG Authoring & Scheduling,"Backfill, Catchup, Execution Dates",8
+Apache Airflow (Python),Operators & Sensors,"Core Operators (Python, Bash, Branch, etc.)",10
+Apache Airflow (Python),Operators & Sensors,"Sensors (ExternalTaskSensor, TimeSensor, etc.)",9
+Apache Airflow (Python),Operators & Sensors,Deferrable Operators (Async),9
+Apache Airflow (Python),Operators & Sensors,"Control Flow Operators (e.g., ShortCircuit)",8
+Apache Airflow (Python),Data Sharing & Logic,"XComs (Push/Pull, Custom Serialization)",9
+Apache Airflow (Python),Data Sharing & Logic,Conditional Execution Logic,8
+Apache Airflow (Python),Extending Airflow,Creating Custom Operators,9
+Apache Airflow (Python),Extending Airflow,Writing Custom Hooks & Sensors,8
+Apache Airflow (Python),Extending Airflow,"Plugin System (UI, Hooks, Operators, Macros)",8
+Apache Airflow (Python),Testing & Debugging,Unit Testing DAGs & Operators,9
+Apache Airflow (Python),Testing & Debugging,Debugging via Logs & Local Execution,9
+Apache Airflow (Python),Deployment & CI/CD,CI/CD Pipelines for DAG Promotion,9
+Apache Airflow (Python),AWS Integrations,"S3, EMR, Redshift, Lambda, ECS Operators",10
+Apache Airflow (Python),AWS Integrations,AWS Secrets Manager & SSM,9
+Apache Airflow (Python),AWS Integrations,External Databases & REST APIs,8
+Apache Airflow (Python),Performance & Scaling,"Pools, Queues, Parallelism",9
+Apache Airflow (Python),Performance & Scaling,DAG Performance Optimization,8
+Apache Airflow (Python),Production Best Practices,Production-Grade DAG Design,10
+Apache Airflow (Python),Production Best Practices,Modular Code & Reusability,9
+Apache Airflow (Python),Production Best Practices,Anti-Patterns to Avoid,9
+Apache Airflow (Python),Production Best Practices,Idempotency & Recovery Patterns,9

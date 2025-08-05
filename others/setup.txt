@@ -1,0 +1,16 @@
+RTX A40
+8888,8000
+/root/.ollama
+container -5 gb
+volume 30 gb
+runpod/pytorch:2.1.0-py3.10-cuda11.8.0-devel-ubuntu22.04
+touch main.py
+run commands
+	curl -fsSL https://ollama.com/install.sh | sh
+	pip install uvicorn fastapi ollama
+	OLLAMA_CONTEXT_LENGTH=40960 ollama serve
+	ollama run qwen3:30b
+	uvicorn main:app --host 0.0.0.0 --port 8000
+
+
+-------to add new subjects - run setups.py
